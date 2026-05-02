@@ -83,6 +83,52 @@ body{background:var(--bg);color:#f0f0f0;font-family:'Inter',system-ui,sans-serif
 .score-label{font-size:.65rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:rgba(240,240,240,.3);margin-bottom:.6rem;}
 .score-val{font-family:'Instrument Serif',serif;font-size:2rem;color:var(--gold);line-height:1;}
 .score-sub{font-size:.7rem;color:rgba(240,240,240,.3);margin-top:.2rem;}
+
+/* ── Mobile CSS ── */
+@media(max-width:768px){
+  /* Header */
+  .dh{padding:.7rem 1rem;flex-wrap:wrap;gap:.5rem;}
+  .dh-logo{flex:1;min-width:0;}
+  .dh-name{font-size:1rem;}
+  .dh-badge{display:none;}
+  .dh-cta{font-size:.75rem;padding:.48rem 1rem;white-space:nowrap;}
+
+  /* Main wrapper: stack vertically */
+  .main-wrap{flex-direction:column;}
+
+  /* Board area: reduce padding */
+  .board-area{padding:1rem;overflow-x:visible;}
+
+  /* Board top: stack title and buttons */
+  .board-top{flex-direction:column;align-items:flex-start;gap:.75rem;margin-bottom:1rem;}
+  .board-title{font-size:1.15rem;}
+  .board-actions{width:100%;justify-content:flex-start;}
+  .ai-btn{font-size:.8rem;padding:.55rem 1.2rem;min-height:44px;}
+  .reset-btn{min-height:40px;font-size:.75rem;}
+
+  /* Kanban: stack columns vertically (1 column) */
+  .board{grid-template-columns:1fr;gap:.75rem;}
+
+  /* Cards: full width, tappable */
+  .card{padding:.85rem;}
+  .card-title{font-size:.88rem;}
+
+  /* AI sidebar: below the board, full width */
+  .ai-sidebar{width:100%;border-left:none;border-top:1px solid rgba(200,168,98,.08);}
+  .ais-body{padding:.85rem 1rem;}
+  .ai-rec{padding:.75rem;}
+  .ai-rec-text{font-size:.8rem;}
+}
+
+@media(max-width:480px){
+  .dh{padding:.6rem .75rem;}
+  .board-area{padding:.75rem;}
+  .board{gap:.6rem;}
+  .card{padding:.75rem;}
+  .card-title{font-size:.85rem;}
+  .ai-btn{font-size:.78rem;}
+  .board-title{font-size:1.05rem;}
+}
 </style>
 </head>
 <body>

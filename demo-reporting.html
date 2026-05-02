@@ -73,6 +73,64 @@ table.dt tr:hover td{background:rgba(200,168,98,.03);}
 .sc-ok{background:rgba(74,222,128,.08);color:#4ade80;border:1px solid rgba(74,222,128,.15);}
 .sc-pend{background:rgba(200,168,98,.08);color:var(--gold);border:1px solid rgba(200,168,98,.15);}
 .sc-err{background:rgba(248,113,113,.08);color:#f87171;border:1px solid rgba(248,113,113,.15);}
+
+/* ── Mobile CSS ── */
+@media(max-width:768px){
+  /* Header */
+  .dh{padding:.7rem 1rem;flex-wrap:wrap;gap:.5rem;}
+  .dh-logo{flex:1;min-width:0;}
+  .dh-name{font-size:1rem;}
+  .dh-badge{display:none;}
+  .dh-cta{font-size:.75rem;padding:.48rem 1rem;white-space:nowrap;}
+
+  /* Dashboard padding */
+  .dash{padding:1rem;}
+
+  /* Top bar: stack title and filters */
+  .dash-top{flex-direction:column;align-items:flex-start;gap:.75rem;margin-bottom:1rem;}
+  .dash-title{font-size:1.2rem;}
+  .dash-meta{font-size:.72rem;}
+  .filter-row{flex-wrap:wrap;gap:.35rem;}
+  .f-btn{font-size:.75rem;padding:.38rem .8rem;min-height:36px;}
+
+  /* KPI grid: already has 2-col at 900px, force 2-col here too */
+  .kpi-grid{grid-template-columns:repeat(2,1fr);gap:.75rem;margin-bottom:1rem;}
+  .kpi{padding:1rem 1.1rem;}
+  .kpi-val{font-size:1.7rem;}
+  .kpi-label{font-size:.67rem;margin-bottom:.5rem;}
+  .kpi-sub{font-size:.68rem;}
+
+  /* Charts row: 1 column */
+  .charts-row{grid-template-columns:1fr;gap:.75rem;margin-bottom:1rem;}
+  .chart-card{padding:1rem 1.1rem;}
+  .chart-title{font-size:.75rem;}
+
+  /* Transactions table: horizontally scrollable */
+  .table-card{overflow-x:auto;}
+  .table-hd{padding:.75rem 1rem;}
+  .table-title{font-size:.75rem;}
+  table.dt{min-width:480px;}
+  table.dt th{font-size:.62rem;padding:.6rem .85rem;}
+  table.dt td{font-size:.75rem;padding:.65rem .85rem;}
+}
+
+@media(max-width:480px){
+  .dh{padding:.6rem .75rem;}
+  .dash{padding:.75rem;}
+  .dash-title{font-size:1.05rem;}
+  /* KPI grid: 1 column on very small screens */
+  .kpi-grid{grid-template-columns:1fr;gap:.6rem;}
+  .kpi{padding:.9rem 1rem;}
+  .kpi-val{font-size:1.9rem;}
+  .charts-row{gap:.6rem;}
+  .chart-card{padding:.85rem .9rem;}
+  /* Table still scrolls horizontally */
+  table.dt{min-width:420px;}
+  table.dt th{padding:.5rem .7rem;}
+  table.dt td{padding:.55rem .7rem;font-size:.72rem;}
+  /* Hide less-critical columns on small phones */
+  table.dt th:nth-child(3),table.dt td:nth-child(3){display:none;}
+}
 </style>
 </head>
 <body>

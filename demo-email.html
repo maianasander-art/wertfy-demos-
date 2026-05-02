@@ -95,6 +95,74 @@ body{background:var(--bg);color:#f0f0f0;font-family:'Inter',system-ui,sans-serif
 .ra-ghost:hover{border-color:rgba(200,168,98,.3);color:rgba(240,240,240,.65);}
 
 .ai-empty{padding:2rem 1.25rem;text-align:center;color:rgba(240,240,240,.2);font-size:.8rem;}
+
+/* ── Mobile CSS ── */
+/* Mobile inbox toggle button – hidden on desktop */
+.inbox-toggle{display:none;position:fixed;bottom:1.25rem;left:1.25rem;z-index:200;background:var(--gold);color:#000;border:none;border-radius:999px;padding:.6rem 1.1rem;font-family:'Inter',sans-serif;font-weight:700;font-size:.8rem;cursor:pointer;box-shadow:0 4px 16px rgba(200,168,98,.35);align-items:center;gap:.4rem;}
+
+@media(max-width:768px){
+  /* Body: allow scrolling on mobile */
+  body{height:auto;overflow:auto;}
+
+  /* Show the inbox toggle button */
+  .inbox-toggle{display:inline-flex;}
+
+  /* Switch to single-column stacked layout */
+  .app{grid-template-columns:1fr;height:auto;display:flex;flex-direction:column;}
+
+  /* Header */
+  .dh{padding:.7rem 1rem;flex-wrap:wrap;gap:.5rem;}
+  .dh-logo{flex:1;min-width:0;}
+  .dh-name{font-size:1rem;}
+  .dh-badge{display:none;}
+  .dh-cta{font-size:.75rem;padding:.48rem 1rem;white-space:nowrap;}
+
+  /* Inbox sidebar: hidden by default on mobile, slides in as overlay */
+  .inbox{
+    position:fixed;top:0;left:0;bottom:0;
+    width:85vw;max-width:320px;
+    z-index:150;
+    overflow-y:auto;
+    background:#050403;
+    border-right:1px solid rgba(200,168,98,.15);
+    transform:translateX(-100%);
+    transition:transform .28s ease;
+  }
+  .inbox.open{transform:translateX(0);}
+
+  /* Overlay behind open inbox */
+  .inbox-backdrop{display:none;position:fixed;inset:0;z-index:140;background:rgba(0,0,0,.6);}
+  .inbox-backdrop.open{display:block;}
+
+  /* Email content: full width, scrollable, min height */
+  .email-content{border-right:none;border-bottom:1px solid rgba(200,168,98,.08);padding:1.25rem 1rem;min-height:260px;}
+  .email-subject-line{font-size:1.1rem;}
+  .email-actions{gap:.4rem;}
+  .action-btn{font-size:.75rem;padding:.5rem .85rem;min-height:40px;}
+  .action-btn.primary{min-height:44px;}
+
+  /* AI panel: full width below email */
+  .ai-panel{overflow-y:visible;}
+  .ai-reply,.ai-section{padding:.85rem 1rem;}
+  .reply-box{font-size:.82rem;min-height:100px;}
+  .ra-btn{min-height:40px;font-size:.78rem;}
+  .ra-primary{min-height:44px;}
+  .reply-actions{flex-wrap:wrap;}
+
+  /* Mail list items: bigger tap targets */
+  .mail-item{padding:.85rem 1rem;min-height:60px;}
+  .mail-sender{font-size:.85rem;}
+}
+
+@media(max-width:480px){
+  .dh{padding:.6rem .75rem;}
+  .email-content{padding:1rem .75rem;}
+  .ai-section,.ai-reply{padding:.75rem .85rem;}
+  .email-subject-line{font-size:1rem;}
+  .email-body{font-size:.82rem;}
+  .action-btn{font-size:.72rem;padding:.45rem .7rem;}
+  .inbox-toggle{bottom:1rem;left:1rem;font-size:.75rem;padding:.55rem .9rem;}
+}
 </style>
 </head>
 <body>
@@ -108,9 +176,15 @@ body{background:var(--bg);color:#f0f0f0;font-family:'Inter',system-ui,sans-serif
   <a href="mailto:kontakt@wertfy.com" class="dh-cta">Gespräch buchen <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
 </header>
 
+<div class="inbox-backdrop" id="inboxBackdrop"></div>
+<button class="inbox-toggle" id="inboxToggle">
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+  Posteingang
+</button>
+
 <div class="app">
   <!-- Sidebar -->
-  <div class="inbox">
+  <div class="inbox" id="inboxSidebar">
     <div class="inbox-hd">
       <span class="inbox-title">Posteingang</span>
       <span class="inbox-count">6 neu</span>
@@ -139,6 +213,30 @@ body{background:var(--bg);color:#f0f0f0;font-family:'Inter',system-ui,sans-serif
 </div>
 
 <script>
+// Mobile inbox toggle
+(function(){
+  var toggle = document.getElementById('inboxToggle');
+  var sidebar = document.getElementById('inboxSidebar');
+  var backdrop = document.getElementById('inboxBackdrop');
+  if(toggle && sidebar && backdrop){
+    toggle.addEventListener('click', function(){
+      sidebar.classList.toggle('open');
+      backdrop.classList.toggle('open');
+    });
+    backdrop.addEventListener('click', function(){
+      sidebar.classList.remove('open');
+      backdrop.classList.remove('open');
+    });
+    // Close sidebar after selecting a mail on mobile
+    document.addEventListener('click', function(e){
+      if(e.target.closest('.mail-item') && window.innerWidth <= 768){
+        sidebar.classList.remove('open');
+        backdrop.classList.remove('open');
+      }
+    });
+  }
+})();
+
 var emails = [
   {
     id:0, unread:true,

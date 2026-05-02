@@ -116,6 +116,74 @@ body{background:var(--bg);color:#f0f0f0;font-family:'Inter',system-ui,sans-serif
 .sec-label-bar{padding:.4rem 1rem;background:rgba(200,168,98,.04);border-top:1px solid rgba(200,168,98,.06);display:flex;align-items:center;justify-content:space-between;}
 .slb-name{font-size:.62rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:rgba(200,168,98,.4);}
 .slb-new{font-size:.58rem;color:#4ade80;font-weight:600;}
+
+/* ── Mobile CSS ── */
+@media(max-width:768px){
+  /* Header */
+  .dh{padding:.7rem 1rem;flex-wrap:wrap;gap:.5rem;}
+  .dh-logo{flex:1;min-width:0;}
+  .dh-name{font-size:1rem;}
+  .dh-badge{display:none;}
+  .dh-cta{font-size:.75rem;padding:.48rem 1rem;white-space:nowrap;}
+
+  /* Layout: stack vertically — prompt panel on top, preview below */
+  .layout{grid-template-columns:1fr;min-height:0;height:auto;}
+
+  /* Prompt panel: auto height, no fixed overflow */
+  .prompt-panel{border-right:none;border-bottom:1px solid rgba(200,168,98,.08);padding:1.25rem 1rem;overflow-y:visible;gap:1rem;}
+  .pp-title{font-size:1.1rem;}
+  .pp-sub{font-size:.8rem;}
+
+  /* Prompt textarea: readable */
+  .prompt-input{font-size:.875rem;height:80px;}
+  .prompt-footer{padding:.5rem .9rem;flex-wrap:wrap;gap:.5rem;}
+  .prompt-hint{font-size:.7rem;}
+  .gen-btn{font-size:.8rem;padding:.52rem 1.1rem;min-height:44px;}
+
+  /* Presets: full width items */
+  .preset{padding:.65rem .85rem;}
+  .preset-name{font-size:.82rem;}
+  .preset-desc{font-size:.72rem;}
+
+  /* Progress steps */
+  .gen-step{font-size:.8rem;}
+
+  /* Preview panel: auto height */
+  .preview-panel{min-height:300px;overflow-y:auto;}
+  .preview-toolbar{padding:.55rem 1rem;gap:.5rem;}
+  .url-bar{font-size:.7rem;}
+  .view-btn{font-size:.65rem;padding:.3rem .6rem;}
+
+  /* Generated sections: reduce padding */
+  .sec-hero{padding:2.5rem 1.5rem;}
+  .sec-hero-title{font-size:1.9rem;}
+  .sec-hero-sub{font-size:.82rem;}
+  .sec-hero-btns{flex-wrap:wrap;gap:.5rem;}
+  .sec-btn-prim,.sec-btn-ghost{padding:.6rem 1.25rem;font-size:.82rem;min-height:44px;}
+  .sec-trust{gap:1rem;}
+
+  .sec-features{padding:2rem 1.25rem;}
+  .feat-grid{grid-template-columns:1fr;gap:.75rem;}
+
+  .sec-about{grid-template-columns:1fr;padding:2rem 1.25rem;gap:1.5rem;}
+  .about-img{aspect-ratio:16/9;}
+
+  .sec-cta{padding:2rem 1.25rem;}
+  .sec-cta-title{font-size:1.4rem;}
+  .sec-cta-btn{padding:.7rem 1.75rem;font-size:.85rem;min-height:44px;}
+}
+
+@media(max-width:480px){
+  .dh{padding:.6rem .75rem;}
+  .prompt-panel{padding:1rem .75rem;}
+  .prompt-input{font-size:.85rem;}
+  .gen-btn{font-size:.78rem;}
+  .sec-hero{padding:2rem 1rem;}
+  .sec-hero-title{font-size:1.6rem;}
+  .sec-features,.sec-about,.sec-cta{padding:1.75rem 1rem;}
+  .feat-grid{gap:.6rem;}
+  .about-stat{flex-direction:column;gap:.5rem;}
+}
 </style>
 </head>
 <body>

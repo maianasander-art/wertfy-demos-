@@ -91,6 +91,57 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',system-ui,sans-s
 .wa-bar{display:flex;align-items:center;justify-content:center;gap:.6rem;padding:.55rem 0 0;border-top:1px solid rgba(37,211,102,.08);margin-top:.5rem;}
 .wa-bar-btn{display:inline-flex;align-items:center;gap:.45rem;background:transparent;border:1px solid rgba(37,211,102,.2);border-radius:999px;padding:.38rem 1.1rem;font-size:.75rem;color:rgba(37,211,102,.7);cursor:pointer;font-family:'Inter',sans-serif;transition:all .2s;}
 .wa-bar-btn:hover{background:rgba(37,211,102,.07);border-color:#25d366;color:#25d366;}
+
+/* ── Mobile CSS ── */
+@media(max-width:768px){
+  /* Header stacks logo and CTA */
+  .dh{padding:.7rem 1rem;flex-wrap:wrap;gap:.5rem;}
+  .dh-logo{flex:1;min-width:0;}
+  .dh-name{font-size:1rem;}
+  .dh-badge{display:none;}
+  .dh-cta{font-size:.75rem;padding:.48rem 1rem;white-space:nowrap;}
+
+  /* Status bar wraps text */
+  .status-bar{padding:.45rem 1rem;flex-wrap:wrap;gap:.4rem;}
+  .status-text{font-size:.7rem;}
+  .status-right{display:none;}
+
+  /* Chat container full-width, less padding */
+  .chat-wrap{padding:0 .75rem;max-width:100%;}
+  .chat-msgs{padding:1rem 0;gap:.75rem;}
+
+  /* Bubbles can use more width on mobile */
+  .bubble{max-width:88%;font-size:.875rem;}
+
+  /* Chips scroll horizontally to avoid wrapping issues */
+  .chips{flex-wrap:nowrap;overflow-x:auto;padding-bottom:.25rem;-webkit-overflow-scrolling:touch;scrollbar-width:none;}
+  .chips::-webkit-scrollbar{display:none;}
+  .chip,.chip-wa{flex-shrink:0;font-size:.8rem;padding:.42rem 1rem;min-height:36px;}
+
+  /* Input row: give input more room */
+  .input-row{gap:.4rem;}
+  .msg-input{font-size:.875rem;padding:.7rem 1rem;min-height:44px;}
+  .send-btn{width:44px;height:44px;}
+
+  /* WhatsApp card full-width */
+  .wa-card{max-width:100%;}
+  .wa-btn{min-height:44px;font-size:.85rem;}
+
+  /* WhatsApp bar wraps gracefully */
+  .wa-bar{flex-wrap:wrap;}
+  .wa-bar-btn{font-size:.75rem;min-height:40px;}
+}
+
+@media(max-width:480px){
+  .dh{padding:.6rem .75rem;}
+  .dh-cta{font-size:.72rem;padding:.44rem .85rem;}
+  .status-bar{padding:.4rem .75rem;}
+  .chat-wrap{padding:0 .5rem;}
+  .bubble{max-width:92%;font-size:.85rem;padding:.65rem .9rem;}
+  .msg-input{font-size:.85rem;}
+  .chip,.chip-wa{font-size:.75rem;padding:.38rem .85rem;}
+  .wa-card{padding:.9rem 1rem;}
+}
 </style>
 </head>
 <body>
