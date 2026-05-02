@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Datenanalyse & Reporting – WertFy Demo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+:root{--gold:#C8A862;--bg:#050403;}
+body{background:var(--bg);color:#f0f0f0;font-family:'Inter',system-ui,sans-serif;min-height:100vh;display:flex;flex-direction:column;}
+
+.dh{display:flex;align-items:center;justify-content:space-between;padding:.85rem 2rem;border-bottom:1px solid rgba(200,168,98,.12);background:rgba(5,4,3,.98);position:sticky;top:0;z-index:50;}
+.dh-logo{display:flex;align-items:center;gap:10px;}
+.dh-name{font-family:'Instrument Serif',serif;font-size:1.2rem;color:#f0f0f0;}
+.dh-name span{color:var(--gold);}
+.dh-badge{font-size:.62rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);background:rgba(200,168,98,.08);border:1px solid rgba(200,168,98,.2);border-radius:999px;padding:.22rem .75rem;}
+.dh-cta{background:var(--gold);color:#000;border:none;border-radius:999px;padding:.52rem 1.35rem;font-family:'Inter',sans-serif;font-weight:600;font-size:.8rem;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:.4rem;transition:background .2s;}
+.dh-cta:hover{background:#d4b870;}
+
+/* Dashboard */
+.dash{flex:1;padding:1.75rem 2rem;max-width:1280px;width:100%;margin:0 auto;}
+
+/* Top bar */
+.dash-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;flex-wrap:wrap;gap:1rem;}
+.dash-title{font-family:'Instrument Serif',serif;font-size:1.5rem;color:#f0f0f0;}
+.dash-meta{font-size:.75rem;color:rgba(240,240,240,.35);margin-top:.1rem;}
+.filter-row{display:flex;gap:.4rem;}
+.f-btn{background:transparent;border:1px solid rgba(200,168,98,.15);border-radius:999px;padding:.35rem .9rem;font-size:.75rem;color:rgba(240,240,240,.4);cursor:pointer;font-family:'Inter',sans-serif;transition:all .2s;}
+.f-btn.active{background:rgba(200,168,98,.1);border-color:var(--gold);color:var(--gold);}
+.f-btn:hover:not(.active){border-color:rgba(200,168,98,.3);color:rgba(240,240,240,.6);}
+
+/* KPI cards */
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:1.5rem;}
+@media(max-width:900px){.kpi-grid{grid-template-columns:repeat(2,1fr);}}
+.kpi{background:rgba(255,255,255,.025);border:1px solid rgba(200,168,98,.1);border-radius:.75rem;padding:1.25rem 1.5rem;position:relative;overflow:hidden;transition:border-color .25s;}
+.kpi:hover{border-color:rgba(200,168,98,.22);}
+.kpi::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;border-radius:.75rem .75rem 0 0;}
+.kpi.gold::before{background:linear-gradient(90deg,transparent,var(--gold),transparent);}
+.kpi.green::before{background:linear-gradient(90deg,transparent,#4ade80,transparent);}
+.kpi.blue::before{background:linear-gradient(90deg,transparent,#60a5fa,transparent);}
+.kpi.amber::before{background:linear-gradient(90deg,transparent,#fb923c,transparent);}
+.kpi-label{font-size:.7rem;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:rgba(240,240,240,.35);margin-bottom:.75rem;}
+.kpi-val{font-family:'Instrument Serif',serif;font-size:2.1rem;color:#f0f0f0;line-height:1;}
+.kpi-unit{font-size:.8rem;color:rgba(240,240,240,.4);margin-left:.2rem;}
+.kpi-delta{display:inline-flex;align-items:center;gap:.3rem;margin-top:.5rem;font-size:.72rem;font-weight:500;border-radius:999px;padding:.18rem .55rem;}
+.kpi-delta.up{color:#4ade80;background:rgba(74,222,128,.08);}
+.kpi-delta.down{color:#f87171;background:rgba(248,113,113,.08);}
+.kpi-sub{font-size:.72rem;color:rgba(240,240,240,.3);margin-top:.3rem;}
+
+/* Charts row */
+.charts-row{display:grid;grid-template-columns:2fr 1fr;gap:1rem;margin-bottom:1.5rem;}
+@media(max-width:900px){.charts-row{grid-template-columns:1fr;}}
+.chart-card{background:rgba(255,255,255,.025);border:1px solid rgba(200,168,98,.1);border-radius:.75rem;padding:1.25rem 1.5rem;}
+.chart-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem;}
+.chart-title{font-size:.78rem;font-weight:600;color:rgba(240,240,240,.5);letter-spacing:.08em;text-transform:uppercase;}
+.live-pill{display:flex;align-items:center;gap:.35rem;font-size:.65rem;color:rgba(200,168,98,.6);}
+.live-pip{width:5px;height:5px;border-radius:50%;background:#4ade80;animation:lp 2s ease infinite;}
+@keyframes lp{0%,100%{opacity:1;}50%{opacity:.4;}}
+
+/* Table */
+.table-card{background:rgba(255,255,255,.025);border:1px solid rgba(200,168,98,.1);border-radius:.75rem;overflow:hidden;}
+.table-hd{padding:1rem 1.5rem;border-bottom:1px solid rgba(200,168,98,.07);display:flex;align-items:center;justify-content:space-between;}
+.table-title{font-size:.78rem;font-weight:600;color:rgba(240,240,240,.5);letter-spacing:.08em;text-transform:uppercase;}
+table.dt{width:100%;border-collapse:collapse;}
+table.dt th{font-size:.65rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:rgba(240,240,240,.3);padding:.75rem 1.5rem;text-align:left;border-bottom:1px solid rgba(200,168,98,.06);}
+table.dt td{font-size:.8rem;color:rgba(240,240,240,.75);padding:.75rem 1.5rem;border-bottom:1px solid rgba(200,168,98,.04);}
+table.dt tr:last-child td{border-bottom:none;}
+table.dt tr:hover td{background:rgba(200,168,98,.03);}
+.status-chip{font-size:.62rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;padding:.2rem .6rem;border-radius:999px;}
+.sc-ok{background:rgba(74,222,128,.08);color:#4ade80;border:1px solid rgba(74,222,128,.15);}
+.sc-pend{background:rgba(200,168,98,.08);color:var(--gold);border:1px solid rgba(200,168,98,.15);}
+.sc-err{background:rgba(248,113,113,.08);color:#f87171;border:1px solid rgba(248,113,113,.15);}
+</style>
+</head>
+<body>
+
+<header class="dh">
+  <div class="dh-logo">
+    <svg width="28" height="28" viewBox="-155 -155 310 310"><circle cx="0" cy="0" r="140" stroke="#C8A862" stroke-width="3" fill="none" opacity="0.4"/><circle cx="0" cy="0" r="100" stroke="#C8A862" stroke-width="4" fill="none" opacity="0.75"/><circle cx="0" cy="0" r="54" stroke="#C8A862" stroke-width="5" fill="none"/><circle cx="0" cy="0" r="14" fill="#C8A862"/><circle cx="140" cy="0" r="10" fill="#C8A862"/></svg>
+    <span class="dh-name">WertFy<span>.</span></span>
+    <span class="dh-badge">Datenanalyse & Reporting</span>
+  </div>
+  <a href="mailto:kontakt@wertfy.com" class="dh-cta">Gespräch buchen <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
+</header>
+
+<div class="dash">
+  <div class="dash-top">
+    <div>
+      <div class="dash-title">Executive Dashboard</div>
+      <div class="dash-meta">Müller & Partner GmbH &nbsp;·&nbsp; Echtzeit-Auswertung &nbsp;·&nbsp; Stand: <span id="lastUpdate"></span></div>
+    </div>
+    <div class="filter-row">
+      <button class="f-btn active" onclick="setFilter(this,'7T')">7 Tage</button>
+      <button class="f-btn" onclick="setFilter(this,'30T')">30 Tage</button>
+      <button class="f-btn" onclick="setFilter(this,'12M')">12 Monate</button>
+    </div>
+  </div>
+
+  <!-- KPIs -->
+  <div class="kpi-grid">
+    <div class="kpi gold">
+      <div class="kpi-label">Umsatz (MTD)</div>
+      <div><span class="kpi-val" id="kpi-umsatz">0</span><span class="kpi-unit">€</span></div>
+      <div class="kpi-delta up" id="delta-u">▲ +18,4%</div>
+      <div class="kpi-sub">vs. Vormonat</div>
+    </div>
+    <div class="kpi green">
+      <div class="kpi-label">Neue Aufträge</div>
+      <div><span class="kpi-val" id="kpi-orders">0</span></div>
+      <div class="kpi-delta up" id="delta-o">▲ +7</div>
+      <div class="kpi-sub">vs. Vorwoche</div>
+    </div>
+    <div class="kpi blue">
+      <div class="kpi-label">Ø Bearbeitungszeit</div>
+      <div><span class="kpi-val" id="kpi-time">0</span><span class="kpi-unit">Min</span></div>
+      <div class="kpi-delta up" id="delta-t">▼ −32%</div>
+      <div class="kpi-sub">dank Automatisierung</div>
+    </div>
+    <div class="kpi amber">
+      <div class="kpi-label">Kundenzufriedenheit</div>
+      <div><span class="kpi-val" id="kpi-csat">0</span><span class="kpi-unit">/5</span></div>
+      <div class="kpi-delta up" id="delta-c">▲ +0,3</div>
+      <div class="kpi-sub">NPS: 72</div>
+    </div>
+  </div>
+
+  <!-- Charts -->
+  <div class="charts-row">
+    <div class="chart-card">
+      <div class="chart-hd">
+        <span class="chart-title">Umsatzentwicklung</span>
+        <span class="live-pill"><span class="live-pip"></span> Live</span>
+      </div>
+      <canvas id="revenueChart" height="90"></canvas>
+    </div>
+    <div class="chart-card">
+      <div class="chart-hd"><span class="chart-title">Auftragsstatus</span></div>
+      <canvas id="statusChart" height="180"></canvas>
+    </div>
+  </div>
+
+  <!-- Table -->
+  <div class="table-card">
+    <div class="table-hd">
+      <span class="table-title">Letzte Transaktionen</span>
+      <span style="font-size:.72rem;color:rgba(200,168,98,.4);">Automatisch klassifiziert</span>
+    </div>
+    <table class="dt">
+      <thead><tr><th>Auftrag</th><th>Kunde</th><th>Leistung</th><th>Betrag</th><th>Datum</th><th>Status</th></tr></thead>
+      <tbody id="txBody"></tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+// Last update
+var now = new Date();
+document.getElementById('lastUpdate').textContent = now.toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'}) + ' Uhr';
+
+// Animate counters
+function animateCounter(el, target, decimals, duration){
+  var start = 0;
+  var startTime = Date.now();
+  function update(){
+    var elapsed = Date.now() - startTime;
+    var progress = Math.min(elapsed / duration, 1);
+    var eased = 1 - Math.pow(1 - progress, 3);
+    var val = start + (target - start) * eased;
+    el.textContent = decimals ? val.toFixed(decimals).replace('.',',') : Math.floor(val).toLocaleString('de-DE');
+    if(progress < 1) requestAnimationFrame(update);
+  }
+  update();
+}
+
+setTimeout(function(){
+  animateCounter(document.getElementById('kpi-umsatz'), 87340, 0, 1800);
+  animateCounter(document.getElementById('kpi-orders'), 43, 0, 1400);
+  animateCounter(document.getElementById('kpi-time'), 8, 1, 1600);
+  animateCounter(document.getElementById('kpi-csat'), 4.7, 1, 1200);
+}, 300);
+
+// Revenue chart
+var months = ['Jan','Feb','Mär','Apr','Mai','Jun','Jul','Aug','Sep','Okt','Nov','Dez'];
+var rev = [52000,58000,54000,61000,67000,63000,71000,75000,69000,78000,82000,87340];
+var ctx1 = document.getElementById('revenueChart').getContext('2d');
+new Chart(ctx1, {
+  type: 'line',
+  data: {
+    labels: months,
+    datasets: [{
+      label: 'Umsatz €',
+      data: rev,
+      borderColor: '#C8A862',
+      backgroundColor: 'rgba(200,168,98,.08)',
+      borderWidth: 2,
+      pointBackgroundColor: '#C8A862',
+      pointRadius: 3,
+      pointHoverRadius: 5,
+      fill: true,
+      tension: 0.4
+    }]
+  },
+  options: {
+    responsive: true,
+    plugins: { legend: { display: false }, tooltip: { callbacks: { label: function(c){ return ' '+c.parsed.y.toLocaleString('de-DE')+' €'; }}}},
+    scales: {
+      x: { grid: { color: 'rgba(200,168,98,.06)' }, ticks: { color: 'rgba(240,240,240,.35)', font: { size: 10 }}},
+      y: { grid: { color: 'rgba(200,168,98,.06)' }, ticks: { color: 'rgba(240,240,240,.35)', font: { size: 10 }, callback: function(v){ return (v/1000)+'k €'; }}}
+    }
+  }
+});
+
+// Status chart
+var ctx2 = document.getElementById('statusChart').getContext('2d');
+new Chart(ctx2, {
+  type: 'doughnut',
+  data: {
+    labels: ['Abgeschlossen', 'In Bearbeitung', 'Ausstehend', 'Storniert'],
+    datasets: [{
+      data: [68, 21, 8, 3],
+      backgroundColor: ['rgba(74,222,128,.7)','rgba(200,168,98,.7)','rgba(96,165,250,.7)','rgba(248,113,113,.5)'],
+      borderColor: ['rgba(74,222,128,.3)','rgba(200,168,98,.3)','rgba(96,165,250,.3)','rgba(248,113,113,.3)'],
+      borderWidth: 1
+    }]
+  },
+  options: {
+    responsive: true,
+    cutout: '65%',
+    plugins: {
+      legend: { position: 'bottom', labels: { color: 'rgba(240,240,240,.5)', font: { size: 10 }, padding: 12 }},
+      tooltip: { callbacks: { label: function(c){ return ' '+c.label+': '+c.parsed+'%'; }}}
+    }
+  }
+});
+
+// Transactions
+var txs = [
+  {id:'AU-2024-1041',cust:'Bergmann GmbH',leist:'Hydraulikservice',betrag:'2.380,00 €',date:'15.11.2024',status:'ok'},
+  {id:'AU-2024-1040',cust:'Fischer & Söhne',leist:'Wartungsvertrag Q4',betrag:'890,00 €',date:'15.11.2024',status:'ok'},
+  {id:'AU-2024-1039',cust:'Kramer Logistik',leist:'Reparatur Förderband',betrag:'4.150,00 €',date:'14.11.2024',status:'pend'},
+  {id:'AU-2024-1038',cust:'Schneider AG',leist:'Ersatzteile HPX-3000',betrag:'1.240,00 €',date:'14.11.2024',status:'ok'},
+  {id:'AU-2024-1037',cust:'Müller Bau KG',leist:'Notfallservice 24h',betrag:'780,00 €',date:'13.11.2024',status:'ok'},
+  {id:'AU-2024-1036',cust:'Weber Industries',leist:'Systemprüfung',betrag:'320,00 €',date:'13.11.2024',status:'err'}
+];
+var statusMap = {ok:['sc-ok','Bezahlt'],pend:['sc-pend','Ausstehend'],err:['sc-err','Reklamation']};
+var tb = document.getElementById('txBody');
+txs.forEach(function(t){
+  var s = statusMap[t.status];
+  var tr = document.createElement('tr');
+  tr.innerHTML = '<td style="font-weight:500;color:#f0f0f0;">'+t.id+'</td><td>'+t.cust+'</td><td>'+t.leist+'</td><td style="font-family:\'Instrument Serif\',serif;color:var(--gold);">'+t.betrag+'</td><td style="color:rgba(240,240,240,.4);">'+t.date+'</td><td><span class="status-chip '+s[0]+'">'+s[1]+'</span></td>';
+  tb.appendChild(tr);
+});
+
+// Filter switcher
+function setFilter(el, period){
+  document.querySelectorAll('.f-btn').forEach(function(b){b.classList.remove('active');});
+  el.classList.add('active');
+}
+
+// Live update simulation
+setInterval(function(){
+  var el = document.getElementById('kpi-umsatz');
+  var current = parseInt(el.textContent.replace(/\./g,''));
+  var delta = Math.floor(Math.random()*500 - 100);
+  var next = Math.max(85000, current + delta);
+  el.textContent = next.toLocaleString('de-DE');
+  document.getElementById('lastUpdate').textContent = new Date().toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'})+' Uhr';
+}, 4000);
+</script>
+</body>
+</html>

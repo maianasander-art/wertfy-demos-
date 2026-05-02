@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>E-Mail-Automatisierung – WertFy Demo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+:root{--gold:#C8A862;--bg:#050403;}
+body{background:var(--bg);color:#f0f0f0;font-family:'Inter',system-ui,sans-serif;height:100vh;display:flex;flex-direction:column;overflow:hidden;}
+
+.dh{display:flex;align-items:center;justify-content:space-between;padding:.85rem 2rem;border-bottom:1px solid rgba(200,168,98,.12);background:rgba(5,4,3,.98);flex-shrink:0;z-index:10;}
+.dh-logo{display:flex;align-items:center;gap:10px;}
+.dh-name{font-family:'Instrument Serif',serif;font-size:1.2rem;color:#f0f0f0;}
+.dh-name span{color:var(--gold);}
+.dh-badge{font-size:.62rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);background:rgba(200,168,98,.08);border:1px solid rgba(200,168,98,.2);border-radius:999px;padding:.22rem .75rem;}
+.dh-cta{background:var(--gold);color:#000;border:none;border-radius:999px;padding:.52rem 1.35rem;font-family:'Inter',sans-serif;font-weight:600;font-size:.8rem;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:.4rem;transition:background .2s;}
+.dh-cta:hover{background:#d4b870;}
+
+/* Three-pane layout */
+.app{flex:1;display:grid;grid-template-columns:280px 1fr 320px;min-height:0;}
+
+/* Inbox sidebar */
+.inbox{border-right:1px solid rgba(200,168,98,.08);overflow-y:auto;background:rgba(255,255,255,.01);}
+.inbox::-webkit-scrollbar{width:3px;}
+.inbox::-webkit-scrollbar-thumb{background:rgba(200,168,98,.1);border-radius:2px;}
+.inbox-hd{padding:1rem 1.25rem;border-bottom:1px solid rgba(200,168,98,.07);display:flex;align-items:center;justify-content:space-between;}
+.inbox-title{font-size:.72rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:rgba(240,240,240,.35);}
+.inbox-count{font-size:.65rem;background:rgba(200,168,98,.12);color:var(--gold);border-radius:999px;padding:.1rem .5rem;font-weight:600;}
+
+.mail-item{padding:.9rem 1.25rem;border-bottom:1px solid rgba(200,168,98,.05);cursor:pointer;transition:background .18s;position:relative;}
+.mail-item:hover{background:rgba(200,168,98,.04);}
+.mail-item.active{background:rgba(200,168,98,.07);border-right:2px solid var(--gold);}
+.mail-item.unread .mail-sender{font-weight:600;color:#f0f0f0;}
+.mail-sender{font-size:.82rem;color:rgba(240,240,240,.75);margin-bottom:.2rem;display:flex;align-items:center;justify-content:space-between;}
+.mail-time{font-size:.65rem;color:rgba(240,240,240,.3);font-weight:400;}
+.mail-subject{font-size:.78rem;color:rgba(240,240,240,.55);margin-bottom:.3rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.mail-preview{font-size:.72rem;color:rgba(240,240,240,.3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.mail-tags{display:flex;gap:.3rem;margin-top:.4rem;flex-wrap:wrap;}
+.m-tag{font-size:.58rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;padding:.12rem .45rem;border-radius:999px;}
+.mt-anfrage{background:rgba(96,165,250,.08);color:#60a5fa;border:1px solid rgba(96,165,250,.15);}
+.mt-beschwerde{background:rgba(248,113,113,.08);color:#f87171;border:1px solid rgba(248,113,113,.15);}
+.mt-angebot{background:rgba(200,168,98,.08);color:var(--gold);border:1px solid rgba(200,168,98,.15);}
+.mt-intern{background:rgba(74,222,128,.08);color:#4ade80;border:1px solid rgba(74,222,128,.15);}
+.mt-support{background:rgba(251,146,60,.08);color:#fb923c;border:1px solid rgba(251,146,60,.15);}
+.unread-dot{position:absolute;right:.85rem;top:1.1rem;width:7px;height:7px;border-radius:50%;background:var(--gold);}
+
+/* Email content */
+.email-content{padding:1.75rem 2rem;overflow-y:auto;border-right:1px solid rgba(200,168,98,.08);}
+.email-content::-webkit-scrollbar{width:3px;}
+.email-content::-webkit-scrollbar-thumb{background:rgba(200,168,98,.1);border-radius:2px;}
+.email-placeholder{height:100%;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:.75rem;color:rgba(240,240,240,.2);}
+.email-ph-icon{width:48px;height:48px;border-radius:50%;background:rgba(200,168,98,.05);border:1px solid rgba(200,168,98,.1);display:flex;align-items:center;justify-content:center;}
+.email-ph-text{font-size:.85rem;}
+.email-from{font-size:.72rem;color:rgba(240,240,240,.35);margin-bottom:1.25rem;line-height:1.6;}
+.email-from strong{color:rgba(240,240,240,.7);font-weight:500;}
+.email-subject-line{font-family:'Instrument Serif',serif;font-size:1.35rem;color:#f0f0f0;margin-bottom:1.25rem;line-height:1.3;}
+.email-body{font-size:.85rem;color:rgba(240,240,240,.65);line-height:1.8;}
+.email-divider{height:1px;background:rgba(200,168,98,.07);margin:1.5rem 0;}
+.email-actions{display:flex;gap:.6rem;flex-wrap:wrap;}
+.action-btn{background:rgba(255,255,255,.04);border:1px solid rgba(200,168,98,.12);border-radius:999px;padding:.42rem 1rem;font-size:.75rem;color:rgba(240,240,240,.5);cursor:pointer;font-family:'Inter',sans-serif;transition:all .2s;}
+.action-btn:hover{border-color:rgba(200,168,98,.3);color:rgba(240,240,240,.8);}
+.action-btn.primary{background:var(--gold);border-color:var(--gold);color:#000;font-weight:600;}
+.action-btn.primary:hover{background:#d4b870;}
+
+/* AI panel */
+.ai-panel{overflow-y:auto;background:rgba(200,168,98,.02);}
+.ai-panel::-webkit-scrollbar{width:3px;}
+.ai-panel::-webkit-scrollbar-thumb{background:rgba(200,168,98,.1);border-radius:2px;}
+.ai-hd{padding:1rem 1.25rem;border-bottom:1px solid rgba(200,168,98,.07);}
+.ai-hd-title{font-size:.72rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:rgba(240,240,240,.35);margin-bottom:.15rem;}
+.ai-hd-sub{font-size:.68rem;color:rgba(200,168,98,.45);}
+.ai-section{padding:1rem 1.25rem;border-bottom:1px solid rgba(200,168,98,.06);}
+.ai-sec-title{font-size:.65rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:rgba(240,240,240,.3);margin-bottom:.65rem;}
+.ai-metric{display:flex;align-items:center;justify-content:space-between;margin-bottom:.5rem;}
+.ai-metric-label{font-size:.78rem;color:rgba(240,240,240,.5);}
+.ai-metric-val{font-size:.78rem;font-weight:600;}
+.conf-bar{height:3px;border-radius:2px;background:rgba(200,168,98,.1);margin-top:.25rem;overflow:hidden;}
+.conf-fill{height:100%;border-radius:2px;transition:width .6s ease;}
+.prio-bar{display:flex;gap:3px;margin-top:.5rem;}
+.prio-seg{flex:1;height:5px;border-radius:2px;background:rgba(255,255,255,.06);}
+.prio-seg.filled{background:var(--gold);}
+.prio-seg.filled.red{background:#f87171;}
+
+.ai-reply{padding:1.1rem 1.25rem;}
+.ai-reply-label{font-size:.65rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:rgba(240,240,240,.3);margin-bottom:.75rem;}
+.reply-box{background:rgba(255,255,255,.03);border:1px solid rgba(200,168,98,.1);border-radius:.6rem;padding:1rem;font-size:.78rem;color:rgba(240,240,240,.7);line-height:1.7;min-height:120px;}
+.reply-actions{display:flex;gap:.5rem;margin-top:.75rem;}
+.ra-btn{border:none;border-radius:999px;padding:.42rem 1rem;font-size:.75rem;cursor:pointer;font-family:'Inter',sans-serif;transition:all .2s;}
+.ra-primary{background:var(--gold);color:#000;font-weight:600;}
+.ra-primary:hover{background:#d4b870;}
+.ra-ghost{background:transparent;border:1px solid rgba(200,168,98,.15);color:rgba(240,240,240,.4);}
+.ra-ghost:hover{border-color:rgba(200,168,98,.3);color:rgba(240,240,240,.65);}
+
+.ai-empty{padding:2rem 1.25rem;text-align:center;color:rgba(240,240,240,.2);font-size:.8rem;}
+</style>
+</head>
+<body>
+
+<header class="dh">
+  <div class="dh-logo">
+    <svg width="28" height="28" viewBox="-155 -155 310 310"><circle cx="0" cy="0" r="140" stroke="#C8A862" stroke-width="3" fill="none" opacity="0.4"/><circle cx="0" cy="0" r="100" stroke="#C8A862" stroke-width="4" fill="none" opacity="0.75"/><circle cx="0" cy="0" r="54" stroke="#C8A862" stroke-width="5" fill="none"/><circle cx="0" cy="0" r="14" fill="#C8A862"/><circle cx="140" cy="0" r="10" fill="#C8A862"/></svg>
+    <span class="dh-name">WertFy<span>.</span></span>
+    <span class="dh-badge">E-Mail-Automatisierung</span>
+  </div>
+  <a href="mailto:kontakt@wertfy.com" class="dh-cta">Gespräch buchen <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
+</header>
+
+<div class="app">
+  <!-- Sidebar -->
+  <div class="inbox">
+    <div class="inbox-hd">
+      <span class="inbox-title">Posteingang</span>
+      <span class="inbox-count">6 neu</span>
+    </div>
+    <div id="mailList"></div>
+  </div>
+
+  <!-- Email content -->
+  <div class="email-content" id="emailPane">
+    <div class="email-placeholder">
+      <div class="email-ph-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(200,168,98,.4)" stroke-width="1.5"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+      </div>
+      <span class="email-ph-text">E-Mail auswählen</span>
+    </div>
+  </div>
+
+  <!-- AI panel -->
+  <div class="ai-panel" id="aiPane">
+    <div class="ai-hd">
+      <div class="ai-hd-title">KI-Analyse</div>
+      <div class="ai-hd-sub">Powered by WertFy AI</div>
+    </div>
+    <div class="ai-empty">E-Mail auswählen, um die KI-Analyse zu starten.</div>
+  </div>
+</div>
+
+<script>
+var emails = [
+  {
+    id:0, unread:true,
+    sender:'Klaus Bergmann',email:'k.bergmann@bergmann-gmbh.de',
+    time:'09:41',
+    subject:'Dringende Reparaturanfrage – Förderanlage Linie 3',
+    preview:'Sehr geehrte Damen und Herren, aufgrund eines kritischen Ausfalls …',
+    tag:'beschwerde',tagLabel:'Support',
+    body:'Sehr geehrte Damen und Herren,\n\naufgrund eines kritischen Ausfalls unserer Förderanlage in Linie 3 benötigen wir umgehend technische Unterstützung. Die Anlage steht seit heute Morgen 07:30 Uhr still, was zu erheblichen Produktionsausfällen führt.\n\nBitte teilen Sie uns umgehend mit, ob ein Techniker heute noch vor Ort erscheinen kann. Der Schaden betrifft die Hydraulikeinheit HPX-3000.\n\nMit freundlichen Grüßen\nKlaus Bergmann\nBetriebsleiter',
+    cat:'Notfall-Support',catCls:'beschwerde',
+    sentiment:'Dringend / Kritisch',sentCls:'#f87171',
+    prio:5,
+    reply:'Sehr geehrter Herr Bergmann,\n\nvielen Dank für Ihre dringende Meldung. Wir haben Ihre Anfrage sofort als Priorität P1 eingestuft.\n\nUnser Techniker Thomas Richter wird heute um 13:00 Uhr bei Ihnen vor Ort sein. Er hat bereits alle technischen Daten zur HPX-3000 erhalten.\n\nFür Rückfragen erreichen Sie uns jederzeit unter unserer Notfall-Hotline.\n\nMit freundlichen Grüßen\nIhr WertFy-Serviceteam'
+  },
+  {
+    id:1, unread:true,
+    sender:'Sandra Fischer',email:'s.fischer@fischer-soehne.de',
+    time:'09:15',
+    subject:'Angebot Wartungsvertrag 2025 – Anfrage',
+    preview:'Guten Morgen, wir möchten gerne einen Wartungsvertrag für das kommende Jahr …',
+    tag:'angebot',tagLabel:'Angebot',
+    body:'Guten Morgen,\n\nwir möchten gerne einen Wartungsvertrag für das kommende Geschäftsjahr 2025 abschließen. Bitte senden Sie uns ein Angebot für die Vollwartung unserer 3 Produktionsanlagen.\n\nWir sind besonders an einem 24/7-Bereitschaftsservice interessiert.\n\nBeste Grüße\nSandra Fischer\nEinkaufsleitung',
+    cat:'Angebotsanfrage',catCls:'angebot',
+    sentiment:'Positiv / Kaufbereit',sentCls:'var(--gold)',
+    prio:4,
+    reply:'Sehr geehrte Frau Fischer,\n\nvielen Dank für Ihre Anfrage. Wir freuen uns über Ihr Interesse an einem langfristigen Wartungsvertrag.\n\nAuf Basis Ihrer 3 Produktionsanlagen habe ich ein individuelles Angebot vorbereitet (Angebot #2024-0892 im Anhang). Für den 24/7-Bereitschaftsservice empfehle ich unser Premium-Paket.\n\nGerne besprechen wir die Details in einem kurzen Telefonat. Wann passt es Ihnen?\n\nMit freundlichen Grüßen\nIhr Vertriebsteam'
+  },
+  {
+    id:2, unread:true,
+    sender:'Jörg Kramer',email:'j.kramer@kramer-logistik.de',
+    time:'08:53',
+    subject:'Rechnung RE-2024-00847 – Klärungsbedarf',
+    preview:'Sehr geehrte Damen und Herren, bezüglich der Rechnung vom 15.11.2024 …',
+    tag:'beschwerde',tagLabel:'Reklamation',
+    body:'Sehr geehrte Damen und Herren,\n\nbezüglich der Rechnung RE-2024-00847 vom 15.11.2024 haben wir Klärungsbedarf. Die berechneten Frachtkosten von 45,00 € stimmen nicht mit unserem Rahmenvertrag überein, in dem kostenfreie Lieferung ab 2.000 € Auftragswert vereinbart wurde.\n\nBitte prüfen Sie dies und senden Sie uns eine korrigierte Rechnung zu.\n\nMit freundlichen Grüßen\nJörg Kramer',
+    cat:'Rechnungsreklamation',catCls:'beschwerde',
+    sentiment:'Neutral / Sachlich',sentCls:'#60a5fa',
+    prio:3,
+    reply:'Sehr geehrter Herr Kramer,\n\nvielen Dank für Ihren Hinweis. Sie haben vollkommen Recht – gemäß unserem Rahmenvertrag vom 01.03.2023 sind Lieferungen ab 2.000 € Nettoumsatz frachtfrei.\n\nWir haben die Rechnung RE-2024-00847 soeben korrigiert (Korrekturbetrag: 45,00 €). Die aktualisierte Rechnung RE-2024-00847-K erhalten Sie in wenigen Minuten per E-Mail.\n\nWir entschuldigen uns für den Irrtum.\n\nMit freundlichen Grüßen\nIhre Buchhaltung'
+  },
+  {
+    id:3, unread:false,
+    sender:'Petra Schneider',email:'p.schneider@schneider-ag.de',
+    time:'08:20',
+    subject:'Produktanfrage – Hydraulikpumpen Serie HPX',
+    preview:'Guten Tag, wir suchen nach geeigneten Hydraulikpumpen für unsere neue Anlage …',
+    tag:'anfrage',tagLabel:'Anfrage',
+    body:'Guten Tag,\n\nwir suchen nach geeigneten Hydraulikpumpen für unsere neue Produktionslinie. Können Sie uns Informationen zur HPX-Serie zukommen lassen?\n\nInsbesondere interessieren uns Druckstufen über 300 bar und Durchflussmengen zwischen 50–120 l/min.\n\nVielen Dank\nPetra Schneider\nIngenieurswesen',
+    cat:'Produktanfrage',catCls:'anfrage',
+    sentiment:'Positiv / Interessiert',sentCls:'#4ade80',
+    prio:3,
+    reply:'Guten Tag Frau Schneider,\n\nvielen Dank für Ihre Anfrage zur HPX-Serie. Die Modelle HPX-3000 und HPX-4500 erfüllen Ihre Anforderungen:\n\n· HPX-3000: bis 350 bar, 60–100 l/min\n· HPX-4500: bis 420 bar, 80–130 l/min\n\nIch lasse Ihnen das vollständige Datenblatt sowie ein Angebot zukommen.\n\nFreundliche Grüße\nIhr technischer Vertrieb'
+  },
+  {
+    id:4, unread:false,
+    sender:'Markus Weber',email:'m.weber@intern.müller-gmbh.de',
+    time:'Gestern',
+    subject:'[INTERN] Quartalsbericht Q3 – Freigabe erforderlich',
+    preview:'Hallo Team, der Q3-Bericht ist fertig und wartet auf Freigabe durch …',
+    tag:'intern',tagLabel:'Intern',
+    body:'Hallo Team,\n\nder Quartalsbericht Q3 ist fertig ausgearbeitet und wartet auf die Freigabe durch die Geschäftsleitung. Bitte bis Freitag 17:00 Uhr prüfen und freigeben.\n\nDen Entwurf findet ihr im SharePoint unter Berichte/2024/Q3.\n\nViele Grüße\nMarkus',
+    cat:'Interne Kommunikation',catCls:'intern',
+    sentiment:'Neutral / Routinevorgang',sentCls:'#4ade80',
+    prio:2,
+    reply:'Hallo Markus,\n\nvielen Dank für die Vorbereitung des Q3-Berichts. Ich habe den Entwurf gesichtet – der Bericht wird bis Freitag 15:00 Uhr freigegeben.\n\nKleine Anmerkung: Seite 12, Grafik 3 – bitte die Achsenbeschriftung anpassen.\n\nViele Grüße'
+  },
+  {
+    id:5, unread:false,
+    sender:'Newsletter',email:'news@branchenmagazin.de',
+    time:'Gestern',
+    subject:'Branchennews November 2024 – KI in der Produktion',
+    preview:'Ihre monatliche Zusammenfassung: Maschinenbau, Automatisierung, Trends …',
+    tag:'intern',tagLabel:'Info',
+    body:'Branchennews November 2024\n\nDiese Ausgabe: KI-gestützte Qualitätskontrolle im Maschinenbau · Neue EU-Richtlinien zur Anlagensicherheit · Digitalisierung im Mittelstand – Wo stehen wir?\n\nLesen Sie die vollständige Ausgabe auf unserem Portal.',
+    cat:'Newsletter / Marketing',catCls:'intern',
+    sentiment:'Neutral / Automatisiert',sentCls:'rgba(240,240,240,.4)',
+    prio:1,
+    reply:'Dieser Newsletter wurde automatisch archiviert. Keine Antwort erforderlich.'
+  }
+];
+
+var tagClsMap = {anfrage:'mt-anfrage',beschwerde:'mt-beschwerde',angebot:'mt-angebot',intern:'mt-intern',support:'mt-support'};
+
+// Build mail list
+var list = document.getElementById('mailList');
+emails.forEach(function(e){
+  var item = document.createElement('div');
+  item.className = 'mail-item' + (e.unread?' unread':'');
+  item.innerHTML = '<div class="mail-sender"><span>'+e.sender+'</span><span class="mail-time">'+e.time+'</span></div>'
+    + '<div class="mail-subject">'+e.subject+'</div>'
+    + '<div class="mail-preview">'+e.preview+'</div>'
+    + '<div class="mail-tags"><span class="m-tag '+tagClsMap[e.tag]+'">'+e.tagLabel+'</span></div>'
+    + (e.unread?'<div class="unread-dot"></div>':'');
+  item.onclick = function(){
+    document.querySelectorAll('.mail-item').forEach(function(m){m.classList.remove('active');});
+    item.classList.remove('unread');
+    item.querySelector('.unread-dot') && item.querySelector('.unread-dot').remove();
+    item.classList.add('active');
+    showEmail(e);
+  };
+  list.appendChild(item);
+});
+
+function showEmail(e){
+  var pane = document.getElementById('emailPane');
+  pane.innerHTML = '<div class="email-from">'
+    + '<strong>Von:</strong> '+e.sender+' &lt;'+e.email+'&gt;<br>'
+    + '<strong>Betreff:</strong> '+e.subject+'<br>'
+    + '<strong>Datum:</strong> '+e.time+'</div>'
+    + '<div class="email-subject-line">'+e.subject+'</div>'
+    + '<div class="email-body">'+e.body.replace(/\n/g,'<br>')+'</div>'
+    + '<div class="email-divider"></div>'
+    + '<div class="email-actions">'
+    + '<button class="action-btn primary">Antworten</button>'
+    + '<button class="action-btn">Weiterleiten</button>'
+    + '<button class="action-btn">Archivieren</button>'
+    + '<button class="action-btn">Markierung entfernen</button>'
+    + '</div>';
+
+  showAI(e);
+}
+
+function showAI(e){
+  var pane = document.getElementById('aiPane');
+  var prioSegs = '';
+  for(var i=1;i<=5;i++){
+    prioSegs += '<div class="prio-seg'+(i<=e.prio?' filled'+(e.prio>=4?' red':''):'')+'"></div>';
+  }
+  var prioLabel = ['','Sehr niedrig','Niedrig','Mittel','Hoch','Kritisch'][e.prio];
+
+  pane.innerHTML = '<div class="ai-hd"><div class="ai-hd-title">KI-Analyse</div><div class="ai-hd-sub">Powered by WertFy AI</div></div>'
+    + '<div class="ai-section">'
+    + '<div class="ai-sec-title">Klassifizierung</div>'
+    + '<div class="ai-metric"><span class="ai-metric-label">Kategorie</span><span class="ai-metric-val" style="color:var(--gold);">'+e.cat+'</span></div>'
+    + '<div class="conf-bar"><div class="conf-fill" style="width:94%;background:var(--gold);"></div></div>'
+    + '<div style="font-size:.62rem;color:rgba(200,168,98,.4);margin-top:.2rem;">Konfidenz 94%</div>'
+    + '</div>'
+    + '<div class="ai-section">'
+    + '<div class="ai-sec-title">Stimmungsanalyse</div>'
+    + '<div class="ai-metric"><span class="ai-metric-label">Sentiment</span><span class="ai-metric-val" style="color:'+e.sentCls+';">'+e.sentiment+'</span></div>'
+    + '</div>'
+    + '<div class="ai-section">'
+    + '<div class="ai-sec-title">Priorität</div>'
+    + '<div class="ai-metric"><span class="ai-metric-label">Stufe</span><span class="ai-metric-val" style="color:'+(e.prio>=4?'#f87171':'var(--gold)')+';">'+prioLabel+'</span></div>'
+    + '<div class="prio-bar">'+prioSegs+'</div>'
+    + '</div>'
+    + '<div class="ai-reply">'
+    + '<div class="ai-reply-label">KI-Antwortvorschlag</div>'
+    + '<div class="reply-box" id="replyBox"></div>'
+    + '<div class="reply-actions">'
+    + '<button class="ra-btn ra-primary">Antwort übernehmen</button>'
+    + '<button class="ra-btn ra-ghost">Bearbeiten</button>'
+    + '</div>'
+    + '</div>';
+
+  streamReply(e.reply);
+}
+
+function streamReply(text){
+  var box = document.getElementById('replyBox');
+  box.innerHTML = '';
+  var words = text.split(' ');
+  var i = 0;
+  function next(){
+    if(i < words.length){
+      box.innerHTML = words.slice(0,i+1).join(' ').replace(/\n/g,'<br>');
+      i++;
+      setTimeout(next, 28 + Math.random()*15);
+    }
+  }
+  setTimeout(next, 400);
+}
+</script>
+</body>
+</html>

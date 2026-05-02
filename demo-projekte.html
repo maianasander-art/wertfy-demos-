@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Projektmanagement & Digitalisierung – WertFy Demo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+:root{--gold:#C8A862;--bg:#050403;}
+body{background:var(--bg);color:#f0f0f0;font-family:'Inter',system-ui,sans-serif;min-height:100vh;display:flex;flex-direction:column;}
+
+.dh{display:flex;align-items:center;justify-content:space-between;padding:.85rem 2rem;border-bottom:1px solid rgba(200,168,98,.12);background:rgba(5,4,3,.98);flex-shrink:0;position:sticky;top:0;z-index:50;}
+.dh-logo{display:flex;align-items:center;gap:10px;}
+.dh-name{font-family:'Instrument Serif',serif;font-size:1.2rem;color:#f0f0f0;}
+.dh-name span{color:var(--gold);}
+.dh-badge{font-size:.62rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);background:rgba(200,168,98,.08);border:1px solid rgba(200,168,98,.2);border-radius:999px;padding:.22rem .75rem;}
+.dh-cta{background:var(--gold);color:#000;border:none;border-radius:999px;padding:.52rem 1.35rem;font-family:'Inter',sans-serif;font-weight:600;font-size:.8rem;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:.4rem;transition:background .2s;}
+.dh-cta:hover{background:#d4b870;}
+
+/* Main */
+.main-wrap{flex:1;display:flex;gap:0;min-height:0;}
+
+/* Board */
+.board-area{flex:1;padding:1.5rem 2rem;overflow-x:auto;}
+.board-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;flex-wrap:wrap;gap:1rem;}
+.board-title{font-family:'Instrument Serif',serif;font-size:1.4rem;color:#f0f0f0;}
+.board-sub{font-size:.75rem;color:rgba(240,240,240,.3);margin-top:.15rem;}
+.board-actions{display:flex;gap:.5rem;}
+.ai-btn{background:var(--gold);color:#000;border:none;border-radius:999px;padding:.55rem 1.4rem;font-family:'Inter',sans-serif;font-weight:600;font-size:.82rem;cursor:pointer;display:flex;align-items:center;gap:.45rem;transition:all .2s;}
+.ai-btn:hover:not(:disabled){background:#d4b870;transform:translateY(-1px);}
+.ai-btn:disabled{opacity:.45;cursor:not-allowed;}
+.reset-btn{background:transparent;border:1px solid rgba(200,168,98,.15);border-radius:999px;padding:.45rem 1.1rem;font-size:.75rem;color:rgba(240,240,240,.35);cursor:pointer;font-family:'Inter',sans-serif;transition:all .2s;display:none;}
+.reset-btn:hover{border-color:rgba(200,168,98,.3);color:rgba(240,240,240,.6);}
+
+/* Kanban */
+.board{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;align-items:start;}
+.col{background:rgba(255,255,255,.02);border:1px solid rgba(200,168,98,.08);border-radius:.75rem;overflow:hidden;}
+.col-hd{padding:.85rem 1rem;border-bottom:1px solid rgba(200,168,98,.06);display:flex;align-items:center;justify-content:space-between;}
+.col-title{font-size:.72rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:rgba(240,240,240,.4);}
+.col-count{font-size:.65rem;background:rgba(200,168,98,.1);color:var(--gold);border-radius:999px;padding:.1rem .5rem;font-weight:600;}
+.col-body{padding:.75rem;display:flex;flex-direction:column;gap:.6rem;min-height:80px;}
+
+/* Cards */
+.card{background:rgba(255,255,255,.03);border:1px solid rgba(200,168,98,.1);border-radius:.6rem;padding:1rem;transition:border-color .25s, transform .25s, box-shadow .25s;cursor:pointer;}
+.card:hover{border-color:rgba(200,168,98,.25);transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,.3);}
+.card.ai-highlight{border-color:var(--gold);box-shadow:0 0 16px rgba(200,168,98,.12);animation:cardPulse .6s ease;}
+@keyframes cardPulse{0%{transform:scale(1.02);}50%{transform:scale(1.03);}100%{transform:scale(1);}}
+.card-title{font-size:.85rem;font-weight:500;color:#f0f0f0;margin-bottom:.6rem;line-height:1.4;}
+.card-tags{display:flex;gap:.3rem;flex-wrap:wrap;margin-bottom:.65rem;}
+.c-tag{font-size:.58rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;padding:.12rem .45rem;border-radius:999px;}
+.ct-tech{background:rgba(96,165,250,.08);color:#60a5fa;border:1px solid rgba(96,165,250,.15);}
+.ct-dring{background:rgba(248,113,113,.08);color:#f87171;border:1px solid rgba(248,113,113,.15);}
+.ct-ki{background:rgba(200,168,98,.08);color:var(--gold);border:1px solid rgba(200,168,98,.15);}
+.ct-plan{background:rgba(74,222,128,.08);color:#4ade80;border:1px solid rgba(74,222,128,.15);}
+.ct-kunde{background:rgba(167,139,250,.08);color:#a78bfa;border:1px solid rgba(167,139,250,.15);}
+.card-meta{display:flex;align-items:center;justify-content:space-between;}
+.card-assignee{display:flex;align-items:center;gap:.4rem;font-size:.7rem;color:rgba(240,240,240,.35);}
+.avatar-xs{width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.55rem;font-weight:700;color:#000;}
+.card-prio{font-size:.62rem;font-weight:600;padding:.12rem .45rem;border-radius:999px;}
+.p-hoch{background:rgba(248,113,113,.08);color:#f87171;border:1px solid rgba(248,113,113,.12);}
+.p-mittel{background:rgba(200,168,98,.08);color:var(--gold);border:1px solid rgba(200,168,98,.12);}
+.p-niedrig{background:rgba(74,222,128,.08);color:#4ade80;border:1px solid rgba(74,222,128,.12);}
+
+/* Progress bar in card */
+.card-progress{margin:0.6rem 0;height:2px;background:rgba(255,255,255,.06);border-radius:2px;overflow:hidden;}
+.cp-fill{height:100%;border-radius:2px;background:var(--gold);}
+
+/* AI sidebar */
+.ai-sidebar{width:300px;border-left:1px solid rgba(200,168,98,.08);background:rgba(200,168,98,.015);flex-shrink:0;overflow-y:auto;}
+.ais-hd{padding:1rem 1.25rem;border-bottom:1px solid rgba(200,168,98,.07);}
+.ais-title{font-size:.72rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:rgba(240,240,240,.35);margin-bottom:.1rem;}
+.ais-sub{font-size:.65rem;color:rgba(200,168,98,.4);}
+.ais-body{padding:1rem 1.25rem;display:flex;flex-direction:column;gap:.75rem;}
+.ai-rec{background:rgba(255,255,255,.025);border:1px solid rgba(200,168,98,.1);border-radius:.6rem;padding:.85rem;}
+.ai-rec-title{font-size:.72rem;font-weight:600;color:rgba(240,240,240,.5);margin-bottom:.4rem;display:flex;align-items:center;gap:.4rem;}
+.rec-dot{width:5px;height:5px;border-radius:50%;background:var(--gold);}
+.ai-rec-text{font-size:.78rem;color:rgba(240,240,240,.6);line-height:1.6;}
+.ai-rec-action{margin-top:.5rem;font-size:.7rem;color:var(--gold);font-weight:500;}
+.ais-empty{padding:2rem 1.25rem;text-align:center;color:rgba(240,240,240,.2);font-size:.8rem;}
+.ais-score{padding:1rem 1.25rem;border-top:1px solid rgba(200,168,98,.07);}
+.score-label{font-size:.65rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:rgba(240,240,240,.3);margin-bottom:.6rem;}
+.score-val{font-family:'Instrument Serif',serif;font-size:2rem;color:var(--gold);line-height:1;}
+.score-sub{font-size:.7rem;color:rgba(240,240,240,.3);margin-top:.2rem;}
+</style>
+</head>
+<body>
+
+<header class="dh">
+  <div class="dh-logo">
+    <svg width="28" height="28" viewBox="-155 -155 310 310"><circle cx="0" cy="0" r="140" stroke="#C8A862" stroke-width="3" fill="none" opacity="0.4"/><circle cx="0" cy="0" r="100" stroke="#C8A862" stroke-width="4" fill="none" opacity="0.75"/><circle cx="0" cy="0" r="54" stroke="#C8A862" stroke-width="5" fill="none"/><circle cx="0" cy="0" r="14" fill="#C8A862"/><circle cx="140" cy="0" r="10" fill="#C8A862"/></svg>
+    <span class="dh-name">WertFy<span>.</span></span>
+    <span class="dh-badge">Projektmanagement & Digitalisierung</span>
+  </div>
+  <a href="mailto:kontakt@wertfy.com" class="dh-cta">Gespräch buchen <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
+</header>
+
+<div class="main-wrap">
+  <div class="board-area">
+    <div class="board-top">
+      <div>
+        <div class="board-title">Projektübersicht Q4 2024</div>
+        <div class="board-sub">Müller & Partner GmbH · 11 Aufgaben · KI-optimierte Priorisierung</div>
+      </div>
+      <div class="board-actions">
+        <button class="reset-btn" id="resetBtn" onclick="resetBoard()">Zurücksetzen</button>
+        <button class="ai-btn" id="aiBtn" onclick="runAI()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>
+          KI-Priorisierung starten
+        </button>
+      </div>
+    </div>
+
+    <div class="board" id="board">
+      <div class="col" id="col-offen">
+        <div class="col-hd"><span class="col-title">Offen</span><span class="col-count" id="cnt-offen">5</span></div>
+        <div class="col-body" id="body-offen"></div>
+      </div>
+      <div class="col" id="col-progress">
+        <div class="col-hd"><span class="col-title">In Bearbeitung</span><span class="col-count" id="cnt-prog">4</span></div>
+        <div class="col-body" id="body-progress"></div>
+      </div>
+      <div class="col" id="col-done">
+        <div class="col-hd"><span class="col-title">Abgeschlossen</span><span class="col-count" id="cnt-done">2</span></div>
+        <div class="col-body" id="body-done"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- AI sidebar -->
+  <div class="ai-sidebar">
+    <div class="ais-hd">
+      <div class="ais-title">KI-Empfehlungen</div>
+      <div class="ais-sub">Powered by WertFy AI</div>
+    </div>
+    <div id="aiSide"><div class="ais-empty">Starten Sie die KI-Priorisierung,<br>um Empfehlungen zu erhalten.</div></div>
+  </div>
+</div>
+
+<script>
+var avatarColors = ['#C8A862','#60a5fa','#4ade80','#f87171','#a78bfa','#fb923c'];
+
+var tasks = {
+  offen: [
+    {id:'T-001',title:'Serverinfrastruktur Migration',tags:['tech','dring'],prio:'Hoch',assignee:'TW',progress:0,aiPrio:1},
+    {id:'T-002',title:'Kundenpräsentation Q1 2025 vorbereiten',tags:['kunde'],prio:'Mittel',assignee:'SH',progress:0,aiPrio:2},
+    {id:'T-003',title:'ERP-Schnittstelle dokumentieren',tags:['tech'],prio:'Niedrig',assignee:'MK',progress:0,aiPrio:4},
+    {id:'T-004',title:'KI-Chatbot Testphase starten',tags:['ki'],prio:'Hoch',assignee:'JR',progress:0,aiPrio:1},
+    {id:'T-005',title:'Urlaubsplanung 2025 koordinieren',tags:['plan'],prio:'Niedrig',assignee:'SW',progress:0,aiPrio:5}
+  ],
+  progress: [
+    {id:'T-006',title:'Automatisierung Rechnungsverarbeitung',tags:['ki','tech'],prio:'Hoch',assignee:'JR',progress:65,aiPrio:1},
+    {id:'T-007',title:'Mitarbeiterschulung CRM-System',tags:['plan','kunde'],prio:'Mittel',assignee:'SH',progress:40,aiPrio:3},
+    {id:'T-008',title:'Wartungsvertrag Bergmann GmbH',tags:['kunde'],prio:'Hoch',assignee:'TW',progress:80,aiPrio:2},
+    {id:'T-009',title:'Reporting-Dashboard Konfiguration',tags:['ki'],prio:'Mittel',assignee:'MK',progress:30,aiPrio:3}
+  ],
+  done: [
+    {id:'T-010',title:'ISO-9001 Rezertifizierung',tags:['plan'],prio:'Hoch',assignee:'SW',progress:100,aiPrio:0},
+    {id:'T-011',title:'Q3 Abschlussbericht',tags:['plan'],prio:'Mittel',assignee:'MK',progress:100,aiPrio:0}
+  ]
+};
+
+var tagMap = {tech:'ct-tech',dring:'ct-dring',ki:'ct-ki',plan:'ct-plan',kunde:'ct-kunde'};
+var tagLabel = {tech:'Technik',dring:'Dringend',ki:'KI',plan:'Planung',kunde:'Kunde'};
+var prioMap = {Hoch:'p-hoch',Mittel:'p-mittel',Niedrig:'p-niedrig'};
+var assigneeColors = {TW:0,SH:1,MK:2,JR:3,SW:4};
+
+function makeCard(t, highlight){
+  var div = document.createElement('div');
+  div.className = 'card' + (highlight?' ai-highlight':'');
+  div.id = 'card-'+t.id;
+  var tagsHtml = t.tags.map(function(g){return '<span class="c-tag '+tagMap[g]+'">'+tagLabel[g]+'</span>';}).join('');
+  var progressHtml = t.progress > 0 ? '<div class="card-progress"><div class="cp-fill" style="width:'+t.progress+'%"></div></div>' : '';
+  var ci = assigneeColors[t.assignee] || 0;
+  div.innerHTML = '<div class="card-title">'+t.title+'</div>'
+    + '<div class="card-tags">'+tagsHtml+'</div>'
+    + progressHtml
+    + '<div class="card-meta">'
+    + '<div class="card-assignee"><div class="avatar-xs" style="background:'+avatarColors[ci]+';">'+t.assignee+'</div>'+t.assignee+'</div>'
+    + '<span class="card-prio '+prioMap[t.prio]+'">'+t.prio+'</span>'
+    + '</div>';
+  return div;
+}
+
+function renderBoard(highlights){
+  ['offen','progress','done'].forEach(function(col){
+    var body = document.getElementById('body-'+col);
+    var key = col === 'progress' ? 'progress' : col;
+    body.innerHTML = '';
+    var list = tasks[key] || tasks[col] || [];
+    list.forEach(function(t){
+      body.appendChild(makeCard(t, highlights && highlights.indexOf(t.id) > -1));
+    });
+  });
+  updateCounts();
+}
+
+function updateCounts(){
+  document.getElementById('cnt-offen').textContent = tasks.offen.length;
+  document.getElementById('cnt-prog').textContent = tasks.progress.length;
+  document.getElementById('cnt-done').textContent = tasks.done.length;
+}
+
+renderBoard(null);
+
+var aiRan = false;
+
+function runAI(){
+  if(aiRan) return;
+  var btn = document.getElementById('aiBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="animation:spin 1s linear infinite"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg> KI analysiert …';
+  var style = document.createElement('style');
+  style.textContent = '@keyframes spin{to{transform:rotate(360deg)}}';
+  document.head.appendChild(style);
+
+  setTimeout(function(){
+    // Move T-006 (high prio automation) to top of progress
+    tasks.progress.sort(function(a,b){return a.aiPrio - b.aiPrio;});
+    tasks.offen.sort(function(a,b){return a.aiPrio - b.aiPrio;});
+
+    // Move T-001 to progress (escalate)
+    var t1 = tasks.offen.find(function(t){return t.id==='T-001';});
+    if(t1){ tasks.offen = tasks.offen.filter(function(t){return t.id!=='T-001';}); t1.progress=5; tasks.progress.unshift(t1); }
+
+    renderBoard(['T-006','T-001','T-008','T-004']);
+    showAIRecommendations();
+    btn.innerHTML = '✓ Priorisierung abgeschlossen';
+    btn.style.background = 'rgba(74,222,128,.12)';
+    btn.style.color = '#4ade80';
+    btn.style.border = '1px solid rgba(74,222,128,.2)';
+    document.getElementById('resetBtn').style.display = 'block';
+    aiRan = true;
+  }, 2200);
+}
+
+function showAIRecommendations(){
+  var side = document.getElementById('aiSide');
+  var recs = [
+    {title:'Eskalation erkannt',text:'T-001 (Serverinfrastruktur) wurde in "In Bearbeitung" verschoben. Risiko: Deadline 30.11. Empfehlung: Kapazität von MK umleiten.',action:'→ Aufgabe T-003 pausiert'},
+    {title:'Ressourcenkonflikt',text:'TW hat 3 Aufgaben mit hoher Priorität gleichzeitig. Empfehlung: T-008 an SH übergeben für schnelleren Abschluss.',action:'→ Übergabe vorgeschlagen'},
+    {title:'Automatisierungspotenzial',text:'T-006 (Rechnungsverarbeitung) bei 65% – vollständige Automatisierung in 5 Werktagen erreichbar. Prio erhöht.',action:'→ Abschluss: KW 47'},
+    {title:'Niedrige Priorität verschoben',text:'T-005 (Urlaubsplanung) auf KW 48 verschoben. Kein Einfluss auf kritische Prozesse.',action:'→ Wiedervorlage 25.11.'}
+  ];
+
+  var html = '<div class="ais-body">';
+  recs.forEach(function(r){
+    html += '<div class="ai-rec"><div class="ai-rec-title"><span class="rec-dot"></span>'+r.title+'</div><div class="ai-rec-text">'+r.text+'</div><div class="ai-rec-action">'+r.action+'</div></div>';
+  });
+  html += '</div><div class="ais-score"><div class="score-label">Effizienz-Score</div><div class="score-val">+34%</div><div class="score-sub">prognostizierte Zeitersparnis<br>durch KI-Optimierung</div></div>';
+  side.innerHTML = html;
+}
+
+function resetBoard(){
+  aiRan = false;
+  tasks = {
+    offen:[
+      {id:'T-001',title:'Serverinfrastruktur Migration',tags:['tech','dring'],prio:'Hoch',assignee:'TW',progress:0,aiPrio:1},
+      {id:'T-002',title:'Kundenpräsentation Q1 2025 vorbereiten',tags:['kunde'],prio:'Mittel',assignee:'SH',progress:0,aiPrio:2},
+      {id:'T-003',title:'ERP-Schnittstelle dokumentieren',tags:['tech'],prio:'Niedrig',assignee:'MK',progress:0,aiPrio:4},
+      {id:'T-004',title:'KI-Chatbot Testphase starten',tags:['ki'],prio:'Hoch',assignee:'JR',progress:0,aiPrio:1},
+      {id:'T-005',title:'Urlaubsplanung 2025 koordinieren',tags:['plan'],prio:'Niedrig',assignee:'SW',progress:0,aiPrio:5}
+    ],
+    progress:[
+      {id:'T-006',title:'Automatisierung Rechnungsverarbeitung',tags:['ki','tech'],prio:'Hoch',assignee:'JR',progress:65,aiPrio:1},
+      {id:'T-007',title:'Mitarbeiterschulung CRM-System',tags:['plan','kunde'],prio:'Mittel',assignee:'SH',progress:40,aiPrio:3},
+      {id:'T-008',title:'Wartungsvertrag Bergmann GmbH',tags:['kunde'],prio:'Hoch',assignee:'TW',progress:80,aiPrio:2},
+      {id:'T-009',title:'Reporting-Dashboard Konfiguration',tags:['ki'],prio:'Mittel',assignee:'MK',progress:30,aiPrio:3}
+    ],
+    done:[
+      {id:'T-010',title:'ISO-9001 Rezertifizierung',tags:['plan'],prio:'Hoch',assignee:'SW',progress:100,aiPrio:0},
+      {id:'T-011',title:'Q3 Abschlussbericht',tags:['plan'],prio:'Mittel',assignee:'MK',progress:100,aiPrio:0}
+    ]
+  };
+  renderBoard(null);
+  document.getElementById('aiSide').innerHTML = '<div class="ais-empty">Starten Sie die KI-Priorisierung,<br>um Empfehlungen zu erhalten.</div>';
+  var btn = document.getElementById('aiBtn');
+  btn.disabled = false;
+  btn.style.background = '';
+  btn.style.color = '';
+  btn.style.border = '';
+  btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg> KI-Priorisierung starten';
+  document.getElementById('resetBtn').style.display = 'none';
+}
+</script>
+</body>
+</html>

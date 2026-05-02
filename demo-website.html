@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Website-Erstellung – WertFy Demo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+:root{--gold:#C8A862;--bg:#050403;}
+body{background:var(--bg);color:#f0f0f0;font-family:'Inter',system-ui,sans-serif;min-height:100vh;display:flex;flex-direction:column;}
+
+.dh{display:flex;align-items:center;justify-content:space-between;padding:.85rem 2rem;border-bottom:1px solid rgba(200,168,98,.12);background:rgba(5,4,3,.98);flex-shrink:0;position:sticky;top:0;z-index:50;}
+.dh-logo{display:flex;align-items:center;gap:10px;}
+.dh-name{font-family:'Instrument Serif',serif;font-size:1.2rem;color:#f0f0f0;}
+.dh-name span{color:var(--gold);}
+.dh-badge{font-size:.62rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);background:rgba(200,168,98,.08);border:1px solid rgba(200,168,98,.2);border-radius:999px;padding:.22rem .75rem;}
+.dh-cta{background:var(--gold);color:#000;border:none;border-radius:999px;padding:.52rem 1.35rem;font-family:'Inter',sans-serif;font-weight:600;font-size:.8rem;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:.4rem;transition:background .2s;}
+.dh-cta:hover{background:#d4b870;}
+
+/* Two-panel layout */
+.layout{flex:1;display:grid;grid-template-columns:380px 1fr;min-height:0;}
+@media(max-width:900px){.layout{grid-template-columns:1fr;}}
+
+/* Left: Prompt panel */
+.prompt-panel{border-right:1px solid rgba(200,168,98,.08);padding:1.75rem 1.5rem;display:flex;flex-direction:column;gap:1.25rem;overflow-y:auto;}
+.pp-title{font-family:'Instrument Serif',serif;font-size:1.25rem;color:#f0f0f0;}
+.pp-sub{font-size:.8rem;color:rgba(240,240,240,.4);line-height:1.6;margin-top:.3rem;}
+
+.prompt-box{background:rgba(255,255,255,.03);border:1px solid rgba(200,168,98,.14);border-radius:.65rem;overflow:hidden;}
+.prompt-input{width:100%;background:transparent;border:none;padding:1rem 1.1rem;color:#f0f0f0;font-family:'Inter',sans-serif;font-size:.85rem;line-height:1.6;resize:none;outline:none;height:90px;}
+.prompt-input::placeholder{color:rgba(240,240,240,.28);}
+.prompt-footer{padding:.6rem 1rem;border-top:1px solid rgba(200,168,98,.08);display:flex;align-items:center;justify-content:space-between;}
+.prompt-hint{font-size:.68rem;color:rgba(240,240,240,.25);}
+.gen-btn{background:var(--gold);color:#000;border:none;border-radius:999px;padding:.48rem 1.2rem;font-family:'Inter',sans-serif;font-weight:600;font-size:.78rem;cursor:pointer;display:flex;align-items:center;gap:.4rem;transition:all .2s;}
+.gen-btn:hover:not(:disabled){background:#d4b870;}
+.gen-btn:disabled{opacity:.4;cursor:not-allowed;}
+
+.preset-label{font-size:.68rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:rgba(240,240,240,.28);}
+.presets{display:flex;flex-direction:column;gap:.4rem;}
+.preset{background:rgba(255,255,255,.025);border:1px solid rgba(200,168,98,.1);border-radius:.5rem;padding:.7rem .9rem;cursor:pointer;transition:all .2s;}
+.preset:hover{border-color:rgba(200,168,98,.28);background:rgba(200,168,98,.05);}
+.preset-name{font-size:.8rem;color:rgba(240,240,240,.7);font-weight:500;margin-bottom:.15rem;}
+.preset-desc{font-size:.7rem;color:rgba(240,240,240,.35);}
+
+/* Progress steps */
+.gen-steps{display:flex;flex-direction:column;gap:.5rem;}
+.gen-step{display:flex;align-items:center;gap:.65rem;font-size:.78rem;color:rgba(240,240,240,.35);transition:color .3s;}
+.gen-step.active{color:rgba(240,240,240,.8);}
+.gen-step.done{color:#4ade80;}
+.step-dot{width:16px;height:16px;border-radius:50%;border:1.5px solid rgba(200,168,98,.2);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .3s;}
+.gen-step.active .step-dot{border-color:var(--gold);background:rgba(200,168,98,.1);}
+.gen-step.done .step-dot{border-color:#4ade80;background:rgba(74,222,128,.1);}
+.step-pulse{width:6px;height:6px;border-radius:50%;background:var(--gold);animation:sp 1s ease infinite;}
+@keyframes sp{0%,100%{opacity:1;transform:scale(1);}50%{opacity:.4;transform:scale(.7);}}
+
+/* Right: Preview panel */
+.preview-panel{overflow-y:auto;background:rgba(255,255,255,.01);}
+.preview-panel::-webkit-scrollbar{width:3px;}
+.preview-panel::-webkit-scrollbar-thumb{background:rgba(200,168,98,.1);border-radius:2px;}
+.preview-toolbar{padding:.65rem 1.5rem;border-bottom:1px solid rgba(200,168,98,.07);display:flex;align-items:center;gap:.75rem;flex-shrink:0;position:sticky;top:0;background:rgba(5,4,3,.95);z-index:5;}
+.url-bar{flex:1;background:rgba(255,255,255,.04);border:1px solid rgba(200,168,98,.1);border-radius:999px;padding:.35rem 1rem;font-size:.75rem;color:rgba(240,240,240,.4);font-family:'Inter',monospace;}
+.view-btn{background:rgba(255,255,255,.04);border:1px solid rgba(200,168,98,.1);border-radius:999px;padding:.3rem .7rem;font-size:.68rem;color:rgba(240,240,240,.35);cursor:pointer;font-family:'Inter',sans-serif;transition:all .2s;}
+.view-btn.active{background:rgba(200,168,98,.08);border-color:rgba(200,168,98,.25);color:var(--gold);}
+
+/* Generated website preview */
+.site-preview{padding:0;}
+.preview-empty{height:400px;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:.75rem;color:rgba(240,240,240,.2);}
+.pe-icon{width:48px;height:48px;border-radius:50%;background:rgba(200,168,98,.05);border:1px solid rgba(200,168,98,.1);display:flex;align-items:center;justify-content:center;}
+
+/* Generated sections */
+.site-section{animation:secIn .5s ease both;border-bottom:1px solid rgba(200,168,98,.06);}
+@keyframes secIn{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:none;}}
+
+.sec-hero{background:linear-gradient(135deg,#0a0806,#111008);padding:4rem 3rem;text-align:center;}
+.sec-hero-label{font-size:.65rem;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);margin-bottom:1rem;opacity:.8;}
+.sec-hero-title{font-family:'Instrument Serif',serif;font-size:2.8rem;color:#f0f0f0;line-height:1.1;margin-bottom:1rem;}
+.sec-hero-title em{color:var(--gold);font-style:italic;}
+.sec-hero-sub{font-size:.9rem;color:rgba(240,240,240,.5);max-width:480px;margin:0 auto 2rem;line-height:1.7;}
+.sec-hero-btns{display:flex;gap:.75rem;justify-content:center;}
+.sec-btn-prim{background:var(--gold);color:#000;border:none;border-radius:999px;padding:.7rem 1.75rem;font-weight:600;font-size:.85rem;cursor:pointer;}
+.sec-btn-ghost{background:transparent;border:1px solid rgba(200,168,98,.3);color:var(--gold);border-radius:999px;padding:.65rem 1.75rem;font-size:.85rem;cursor:pointer;}
+.sec-trust{display:flex;align-items:center;justify-content:center;gap:1.5rem;margin-top:2rem;flex-wrap:wrap;}
+.trust-item{font-size:.72rem;color:rgba(240,240,240,.3);display:flex;align-items:center;gap:.4rem;}
+.trust-dot{width:4px;height:4px;border-radius:50%;background:var(--gold);opacity:.5;}
+
+.sec-features{background:#fff;padding:3rem;}
+.sec-features-title{font-family:'Instrument Serif',serif;font-size:1.8rem;color:#111;text-align:center;margin-bottom:.5rem;}
+.sec-features-sub{font-size:.85rem;color:#888;text-align:center;margin-bottom:2rem;}
+.feat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;}
+.feat-card{background:#f6f5f3;border-radius:.6rem;padding:1.25rem;border:1px solid #e8e6e1;}
+.feat-icon{width:32px;height:32px;border-radius:.5rem;background:#111;display:flex;align-items:center;justify-content:center;margin-bottom:.75rem;}
+.feat-title{font-weight:600;font-size:.85rem;color:#111;margin-bottom:.3rem;}
+.feat-desc{font-size:.75rem;color:#888;line-height:1.5;}
+
+.sec-about{background:#f8f7f5;padding:3rem;display:grid;grid-template-columns:1fr 1fr;gap:2.5rem;align-items:center;}
+.about-img{aspect-ratio:3/2;background:linear-gradient(135deg,#e8e6e0,#d8d5cc);border-radius:.75rem;}
+.about-label{font-size:.65rem;letter-spacing:.15em;text-transform:uppercase;color:var(--gold);margin-bottom:.75rem;}
+.about-title{font-family:'Instrument Serif',serif;font-size:1.6rem;color:#111;margin-bottom:.75rem;line-height:1.2;}
+.about-text{font-size:.82rem;color:#888;line-height:1.7;}
+.about-stat{display:flex;gap:2rem;margin-top:1.25rem;}
+.stat-val{font-family:'Instrument Serif',serif;font-size:1.8rem;color:#111;}
+.stat-label{font-size:.72rem;color:#888;margin-top:.1rem;}
+
+.sec-cta{background:#111;padding:3rem;text-align:center;}
+.sec-cta-title{font-family:'Instrument Serif',serif;font-size:1.8rem;color:#f0f0f0;margin-bottom:.75rem;}
+.sec-cta-sub{font-size:.85rem;color:rgba(240,240,240,.45);margin-bottom:1.75rem;}
+.sec-cta-btn{background:var(--gold);color:#000;border:none;border-radius:999px;padding:.8rem 2.2rem;font-weight:700;font-size:.9rem;cursor:pointer;}
+
+.gen-tag{display:inline-flex;align-items:center;gap:.35rem;font-size:.58rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;padding:.18rem .55rem;border-radius:999px;background:rgba(200,168,98,.1);border:1px solid rgba(200,168,98,.2);color:var(--gold);margin-bottom:.5rem;vertical-align:middle;}
+.new-tag{animation:tagPop .3s ease both;}
+@keyframes tagPop{from{opacity:0;transform:scale(.85);}to{opacity:1;transform:none;}}
+
+/* Section label in preview */
+.sec-label-bar{padding:.4rem 1rem;background:rgba(200,168,98,.04);border-top:1px solid rgba(200,168,98,.06);display:flex;align-items:center;justify-content:space-between;}
+.slb-name{font-size:.62rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:rgba(200,168,98,.4);}
+.slb-new{font-size:.58rem;color:#4ade80;font-weight:600;}
+</style>
+</head>
+<body>
+
+<header class="dh">
+  <div class="dh-logo">
+    <svg width="28" height="28" viewBox="-155 -155 310 310"><circle cx="0" cy="0" r="140" stroke="#C8A862" stroke-width="3" fill="none" opacity="0.4"/><circle cx="0" cy="0" r="100" stroke="#C8A862" stroke-width="4" fill="none" opacity="0.75"/><circle cx="0" cy="0" r="54" stroke="#C8A862" stroke-width="5" fill="none"/><circle cx="0" cy="0" r="14" fill="#C8A862"/><circle cx="140" cy="0" r="10" fill="#C8A862"/></svg>
+    <span class="dh-name">WertFy<span>.</span></span>
+    <span class="dh-badge">Website-Erstellung</span>
+  </div>
+  <a href="mailto:kontakt@wertfy.com" class="dh-cta">Gespräch buchen <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
+</header>
+
+<div class="layout">
+  <!-- Left: Prompt panel -->
+  <div class="prompt-panel">
+    <div>
+      <div class="pp-title">Website-Generator</div>
+      <div class="pp-sub">Beschreiben Sie Ihr Unternehmen – WertFy erstellt Ihre professionelle Website automatisch.</div>
+    </div>
+
+    <div class="prompt-box">
+      <textarea class="prompt-input" id="promptInput" placeholder="z. B. Moderne Kanzlei für Steuerberatung in Düsseldorf. Schwerpunkte: KMU, Digitalisierung, internationale Mandanten …"></textarea>
+      <div class="prompt-footer">
+        <span class="prompt-hint">Drücken Sie Generieren oder wählen Sie ein Beispiel</span>
+        <button class="gen-btn" id="genBtn" onclick="generate()">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5,3 19,12 5,21"/></svg>
+          Generieren
+        </button>
+      </div>
+    </div>
+
+    <div>
+      <div class="preset-label" style="margin-bottom:.5rem;">Beispiele</div>
+      <div class="presets">
+        <div class="preset" onclick="usePreset(this)">
+          <div class="preset-name">Steuerberatungskanzlei</div>
+          <div class="preset-desc">Moderne Kanzlei für KMU und Privatmandanten, Düsseldorf</div>
+        </div>
+        <div class="preset" onclick="usePreset(this)">
+          <div class="preset-name">Maschinenbau GmbH</div>
+          <div class="preset-desc">Spezialist für Hydrauliksysteme und Industrieautomation</div>
+        </div>
+        <div class="preset" onclick="usePreset(this)">
+          <div class="preset-name">Logistikunternehmen</div>
+          <div class="preset-desc">Regionaler Transportdienstleister mit 24/7-Service</div>
+        </div>
+      </div>
+    </div>
+
+    <div id="stepsWrap" style="display:none;">
+      <div class="preset-label" style="margin-bottom:.65rem;">Generierungsfortschritt</div>
+      <div class="gen-steps">
+        <div class="gen-step" id="step1"><div class="step-dot"></div><span>Inhalte analysieren & strukturieren</span></div>
+        <div class="gen-step" id="step2"><div class="step-dot"></div><span>Design & Farbschema festlegen</span></div>
+        <div class="gen-step" id="step3"><div class="step-dot"></div><span>Hero-Sektion generieren</span></div>
+        <div class="gen-step" id="step4"><div class="step-dot"></div><span>Leistungen & Features</span></div>
+        <div class="gen-step" id="step5"><div class="step-dot"></div><span>Über uns / Team</span></div>
+        <div class="gen-step" id="step6"><div class="step-dot"></div><span>Call-to-Action & Footer</span></div>
+      </div>
+    </div>
+
+    <div id="resetWrap" style="display:none;">
+      <button style="width:100%;background:transparent;border:1px solid rgba(200,168,98,.15);border-radius:999px;padding:.55rem;font-size:.78rem;color:rgba(240,240,240,.35);cursor:pointer;font-family:Inter,sans-serif;transition:all .2s;" onmouseover="this.style.borderColor='rgba(200,168,98,.35)';this.style.color='rgba(240,240,240,.6)'" onmouseout="this.style.borderColor='rgba(200,168,98,.15)';this.style.color='rgba(240,240,240,.35)'" onclick="resetGen()">Neue Website generieren</button>
+    </div>
+  </div>
+
+  <!-- Right: Preview -->
+  <div class="preview-panel">
+    <div class="preview-toolbar">
+      <div class="url-bar">https://muster-website.de</div>
+      <button class="view-btn active">Desktop</button>
+      <button class="view-btn">Mobil</button>
+    </div>
+    <div class="site-preview" id="sitePreview">
+      <div class="preview-empty">
+        <div class="pe-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(200,168,98,.4)" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+        </div>
+        <span style="font-size:.85rem;">Website-Vorschau erscheint hier</span>
+        <span style="font-size:.75rem;opacity:.6;">Geben Sie einen Prompt ein oder wählen Sie ein Beispiel</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+var presetTexts={
+  'Steuerberatungskanzlei':'Moderne Steuerberatungskanzlei in Düsseldorf. Schwerpunkte: digitale Buchhaltung für KMU, Jahresabschlüsse, Steuergestaltung. Wir begleiten Unternehmen von der Gründung bis zur Nachfolge.',
+  'Maschinenbau GmbH':'Bauer Maschinenbau GmbH – Spezialist für Hydrauliksysteme, Förderanlagen und Industrieautomation. Über 30 Jahre Erfahrung. Service & Wartung 24/7. Qualität made in Germany.',
+  'Logistikunternehmen':'Kramer Logistik – Ihr regionaler Transportpartner im Niederrhein. Lkw-Transport, Lagerlogistik, Expressdienst. 24/7 Bereitschaft, GPS-Tracking, zuverlässig seit 1994.'
+};
+
+var themes={
+  'Steuerberatungskanzlei':{
+    heroBg:'#0b1728',
+    heroBgImg:'https://images.unsplash.com/photo-1450101499163-c8848c66ca85?w=1200&q=80&fit=crop&auto=format',
+    heroOverlay:'rgba(11,23,40,0.82)',
+    accent:'#5b9cf6',btnPrimBg:'#3b7dd8',btnPrimColor:'#fff',
+    btnGhostBorder:'rgba(91,156,246,.4)',btnGhostColor:'#7aabf5',
+    trustColor:'rgba(180,210,255,.3)',trustDot:'#5b9cf6',
+    featBg:'#eef4ff',featCardBg:'#dce8ff',featCardBorder:'#c4d8ff',
+    featIconBg:'#1a3466',featIconStroke:'#7aabf5',
+    featHeadColor:'#0f2040',featTextColor:'#4a6080',
+    aboutBg:'#f0f6ff',
+    aboutImg:'https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?w=700&q=80&fit=crop&auto=format',
+    aboutImgBg:'linear-gradient(135deg,#9bbce8,#6a99d8)',
+    aboutLabelColor:'#3b7dd8',aboutTitleColor:'#0f2040',aboutTextColor:'#4a6080',
+    statValColor:'#0f2040',ctaBg:'#0b1728',ctaBtnBg:'#3b7dd8',ctaBtnColor:'#fff'
+  },
+  'Maschinenbau GmbH':{
+    heroBg:'#0c0f14',
+    heroBgImg:'https://images.unsplash.com/photo-1581092160562-40aa08e78837?w=1200&q=80&fit=crop&auto=format',
+    heroOverlay:'rgba(12,15,20,0.80)',
+    accent:'#8fa8c0',btnPrimBg:'#475f78',btnPrimColor:'#fff',
+    btnGhostBorder:'rgba(143,168,192,.4)',btnGhostColor:'#8fa8c0',
+    trustColor:'rgba(180,200,220,.25)',trustDot:'#6a8499',
+    featBg:'#f0f3f6',featCardBg:'#e4e8ed',featCardBorder:'#cdd4db',
+    featIconBg:'#1a2535',featIconStroke:'#8fa8c0',
+    featHeadColor:'#1a2535',featTextColor:'#526070',
+    aboutBg:'#f2f4f7',
+    aboutImg:'https://images.unsplash.com/photo-1565043589221-1a6fd9ae45c7?w=700&q=80&fit=crop&auto=format',
+    aboutImgBg:'linear-gradient(135deg,#b0bec8,#8fa8c0)',
+    aboutLabelColor:'#475f78',aboutTitleColor:'#1a2535',aboutTextColor:'#526070',
+    statValColor:'#1a2535',ctaBg:'#0c0f14',ctaBtnBg:'#475f78',ctaBtnColor:'#fff'
+  },
+  'Logistikunternehmen':{
+    heroBg:'#021a0c',
+    heroBgImg:'https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?w=1200&q=80&fit=crop&auto=format',
+    heroOverlay:'rgba(2,26,12,0.80)',
+    accent:'#22c55e',btnPrimBg:'#16a34a',btnPrimColor:'#fff',
+    btnGhostBorder:'rgba(34,197,94,.4)',btnGhostColor:'#4ade80',
+    trustColor:'rgba(180,255,210,.25)',trustDot:'#22c55e',
+    featBg:'#f0fdf4',featCardBg:'#dcfce7',featCardBorder:'#a7efc0',
+    featIconBg:'#052e16',featIconStroke:'#4ade80',
+    featHeadColor:'#052e16',featTextColor:'#3d6b4f',
+    aboutBg:'#f0fdf4',
+    aboutImg:'https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?w=700&q=80&fit=crop&auto=format',
+    aboutImgBg:'linear-gradient(135deg,#6ee7a0,#22c55e)',
+    aboutLabelColor:'#16a34a',aboutTitleColor:'#052e16',aboutTextColor:'#3d6b4f',
+    statValColor:'#052e16',ctaBg:'#021a0c',ctaBtnBg:'#16a34a',ctaBtnColor:'#fff'
+  }
+};
+
+var content = {
+  'Steuerberatungskanzlei': {
+    hero:{label:'Steuerberatung · Düsseldorf',title:'Mehr Zeit für Ihr <em>Kerngeschäft.</em>',sub:'Wir übernehmen Buchhaltung, Jahresabschlüsse und Steuergestaltung – digital, zuverlässig, persönlich.',btn1:'Erstgespräch vereinbaren',btn2:'Leistungen ansehen',trust:['ISO-zertifiziert','DATEV-Partner','500+ Mandanten']},
+    feats:{title:'Unsere Leistungen',sub:'Alles aus einer Hand – digital und persönlich.',items:[{t:'Digitale Buchhaltung',d:'Automatisierte Belegverarbeitung und Echtzeit-Auswertungen über unser Portal.'},{t:'Jahresabschlüsse',d:'Handels- und steuerrechtliche Abschlüsse termingerecht und fehlerfrei.'},{t:'Steuergestaltung',d:'Individuelle Strategien zur legalen Optimierung Ihrer Steuerlast.'}]},
+    about:{label:'Über uns',title:'Seit 1998 an Ihrer Seite.',text:'Unsere Kanzlei verbindet jahrzehntelange Expertise mit modernster Digitaltechnologie. Jeder Mandant erhält einen festen Ansprechpartner und direkten Zugang zu unserem Mandantenportal.',stats:[{v:'500+',l:'Mandanten'},{v:'25',l:'Jahre Erfahrung'}]},
+    cta:{title:'Bereit für Ihre digitale Kanzlei?',sub:'Vereinbaren Sie jetzt ein kostenloses Erstgespräch – unverbindlich und unkompliziert.',btn:'Termin buchen'}
+  },
+  'Maschinenbau GmbH': {
+    hero:{label:'Maschinenbau · Service · Innovation',title:'Hydraulik & Automation <em>auf höchstem Niveau.</em>',sub:'Maßgeschneiderte Lösungen für Industrie und Produktion. 24/7 Servicebereitschaft. Über 30 Jahre Erfahrung.',btn1:'Angebot anfordern',btn2:'Produkte ansehen',trust:['DIN ISO 9001','24/7 Notfallservice','30+ Jahre Erfahrung']},
+    feats:{title:'Unsere Produkte & Leistungen',sub:'Qualität, Zuverlässigkeit und Innovation – made in Germany.',items:[{t:'Hydrauliksysteme HPX',d:'Hochleistungspumpen und Antriebe bis 420 bar für anspruchsvolle Industrieanwendungen.'},{t:'Wartung & Service',d:'Präventive Wartungsverträge und 24/7-Notfallservice durch zertifizierte Techniker.'},{t:'Engineering',d:'Individuelle Konstruktion und Integration in bestehende Produktionsanlagen.'}]},
+    about:{label:'Unternehmen',title:'Präzision seit 1992.',text:'Als inhabergeführter Spezialist für Hydrauliksysteme bedienen wir über 200 Industriekunden im gesamten DACH-Raum. Unsere Techniker sind innerhalb von 4 Stunden bei Ihnen vor Ort.',stats:[{v:'200+',l:'Industriekunden'},{v:'30',l:'Jahre Qualität'}]},
+    cta:{title:'Starten Sie Ihr Projekt.',sub:'Schildern Sie uns Ihre Anforderung – wir erstellen innerhalb von 24 Stunden ein maßgeschneidertes Angebot.',btn:'Angebot anfordern'}
+  },
+  'Logistikunternehmen': {
+    hero:{label:'Transport · Lagerung · Logistik',title:'Ihre Fracht. <em>Pünktlich. Sicher. Zuverlässig.</em>',sub:'Regionaler Transportdienstleister mit über 30 Jahren Erfahrung. GPS-Tracking, 24/7 Bereitschaft, faire Preise.',btn1:'Transportanfrage stellen',btn2:'Über uns',trust:['GPS-Tracking','24/7 Bereitschaft','Seit 1994']},
+    feats:{title:'Unsere Leistungen',sub:'Von der Abholung bis zur Zustellung – alles aus einer Hand.',items:[{t:'Lkw-Transport',d:'Regional und überregional, von der Einzelsendung bis zum Komplettladungsverkehr.'},{t:'Lagerlogistik',d:'Flexible Lagerkapazitäten im Niederrhein mit modernem Warenwirtschaftssystem.'},{t:'Expressdienst',d:'Same-Day-Delivery und Expresstransport für zeitkritische Sendungen.'}]},
+    about:{label:'Über Kramer Logistik',title:'Verlässlich seit 1994.',text:'Gegründet von Karl Kramer als Einmannbetrieb ist Kramer Logistik heute ein regionaler Marktführer mit 45 Fahrzeugen und 80 Mitarbeitenden. Persönlich, zuverlässig, fair.',stats:[{v:'45',l:'Fahrzeuge'},{v:'80',l:'Mitarbeitende'}]},
+    cta:{title:'Transportanfrage stellen.',sub:'Teilen Sie uns Abhol- und Lieferadresse mit – wir melden uns innerhalb einer Stunde mit einem Angebot.',btn:'Jetzt anfragen'}
+  }
+};
+
+var generating=false;
+
+function usePreset(el){
+  var name=el.querySelector('.preset-name').textContent;
+  document.getElementById('promptInput').value=presetTexts[name]||name;
+  document.querySelectorAll('.preset').forEach(function(p){p.style.borderColor='';p.style.background='';});
+  el.style.borderColor='rgba(200,168,98,.35)';
+  el.style.background='rgba(200,168,98,.06)';
+  generate(name);
+}
+
+function generate(presetName){
+  if(generating)return;
+  var promptVal=document.getElementById('promptInput').value.trim();
+  if(!promptVal&&!presetName)return;
+  generating=true;
+  document.getElementById('genBtn').disabled=true;
+  document.getElementById('stepsWrap').style.display='block';
+  document.getElementById('sitePreview').innerHTML='';
+
+  var contentKey=presetName||Object.keys(presetTexts).find(function(k){return promptVal.includes(presetTexts[k].substring(0,20));})||'Maschinenbau GmbH';
+  var data=content[contentKey]||content['Maschinenbau GmbH'];
+  var theme=themes[contentKey]||themes['Steuerberatungskanzlei'];
+
+  var steps=['step1','step2','step3','step4','step5','step6'];
+  var delays=[0,600,1200,2000,2900,3700];
+  var doneTimes=[500,1100,1900,2800,3600,4200];
+  steps.forEach(function(sid,i){
+    setTimeout(function(){setStep(sid,'active');},delays[i]);
+    setTimeout(function(){setStep(sid,'done');},doneTimes[i]);
+  });
+
+  setTimeout(function(){addSection(buildHero(data.hero,theme,contentKey));},1400);
+  setTimeout(function(){addSection(buildFeats(data.feats,theme));},2200);
+  setTimeout(function(){addSection(buildAbout(data.about,theme));},3100);
+  setTimeout(function(){addSection(buildCTA(data.cta,theme));},3900);
+  setTimeout(function(){document.getElementById('resetWrap').style.display='block';generating=false;},4500);
+}
+
+function setStep(id,state){
+  var el=document.getElementById(id);
+  el.className='gen-step '+state;
+  var dot=el.querySelector('.step-dot');
+  if(state==='active'){dot.innerHTML='<div class="step-pulse"></div>';}
+  else if(state==='done'){dot.innerHTML='<svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#4ade80" stroke-width="3"><polyline points="20,6 9,17 4,12"/></svg>';}
+}
+
+function addSection(html){
+  var wrap=document.createElement('div');
+  wrap.className='site-section';
+  wrap.innerHTML=html;
+  document.getElementById('sitePreview').appendChild(wrap);
+  wrap.scrollIntoView({behavior:'smooth',block:'end'});
+}
+
+function heroVisual(key,a){
+  if(key==='Steuerberatungskanzlei'){
+    return '<div style="margin:1.5rem auto .5rem;display:flex;justify-content:center;">'
+      +'<svg width="210" height="90" viewBox="0 0 210 90" fill="none">'
+      +'<line x1="4" y1="74" x2="206" y2="74" stroke="'+a+'" stroke-opacity="0.12" stroke-width="1"/>'
+      +'<line x1="4" y1="50" x2="206" y2="50" stroke="'+a+'" stroke-opacity="0.07" stroke-width="1"/>'
+      +'<line x1="4" y1="26" x2="206" y2="26" stroke="'+a+'" stroke-opacity="0.05" stroke-width="1"/>'
+      +'<rect x="12" y="74" width="22" height="0" rx="3" fill="'+a+'" fill-opacity="0.38"><animate attributeName="height" values="0;42" dur="0.5s" begin="0.1s" fill="freeze"/><animate attributeName="y" values="74;32" dur="0.5s" begin="0.1s" fill="freeze"/></rect>'
+      +'<rect x="48" y="74" width="22" height="0" rx="3" fill="'+a+'" fill-opacity="0.52"><animate attributeName="height" values="0;55" dur="0.5s" begin="0.2s" fill="freeze"/><animate attributeName="y" values="74;19" dur="0.5s" begin="0.2s" fill="freeze"/></rect>'
+      +'<rect x="84" y="74" width="22" height="0" rx="3" fill="'+a+'" fill-opacity="0.64"><animate attributeName="height" values="0;38" dur="0.5s" begin="0.32s" fill="freeze"/><animate attributeName="y" values="74;36" dur="0.5s" begin="0.32s" fill="freeze"/></rect>'
+      +'<rect x="120" y="74" width="22" height="0" rx="3" fill="'+a+'" fill-opacity="0.78"><animate attributeName="height" values="0;60" dur="0.5s" begin="0.44s" fill="freeze"/><animate attributeName="y" values="74;14" dur="0.5s" begin="0.44s" fill="freeze"/></rect>'
+      +'<rect x="156" y="74" width="22" height="0" rx="3" fill="'+a+'"><animate attributeName="height" values="0;68" dur="0.5s" begin="0.56s" fill="freeze"/><animate attributeName="y" values="74;6" dur="0.5s" begin="0.56s" fill="freeze"/></rect>'
+      +'<polyline points="23,32 59,19 95,36 131,14 167,6" stroke="'+a+'" stroke-width="1.5" fill="none" stroke-opacity="0.55" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="220" stroke-dashoffset="220"><animate attributeName="stroke-dashoffset" values="220;0" dur="0.65s" begin="0.9s" fill="freeze"/></polyline>'
+      +'<circle cx="167" cy="6" r="3.5" fill="'+a+'" opacity="0"><animate attributeName="opacity" values="0;1" dur="0.2s" begin="1.5s" fill="freeze"/></circle>'
+      +'<text x="188" y="24" fill="'+a+'" fill-opacity="0.7" font-size="17" font-family="Georgia,serif" font-weight="bold">€<animate attributeName="y" values="24;14;24" dur="4s" repeatCount="indefinite"/><animate attributeName="fill-opacity" values="0.7;1;0.7" dur="4s" repeatCount="indefinite"/></text>'
+      +'</svg></div>';
+  } else if(key==='Maschinenbau GmbH'){
+    return '<div style="margin:1.5rem auto .5rem;display:flex;justify-content:center;">'
+      +'<svg width="210" height="90" viewBox="0 0 210 90" fill="none">'
+      +'<g><animateTransform attributeName="transform" type="rotate" from="0 82 52" to="360 82 52" dur="16s" repeatCount="indefinite"/>'
+      +'<circle cx="82" cy="52" r="34" stroke="'+a+'" stroke-width="7" stroke-dasharray="11 9" stroke-opacity="0.32" fill="none"/>'
+      +'<circle cx="82" cy="52" r="24" stroke="'+a+'" stroke-width="1.5" stroke-opacity="0.5" fill="none"/>'
+      +'<circle cx="82" cy="52" r="9" stroke="'+a+'" stroke-width="1.5" stroke-opacity="0.65" fill="none"/>'
+      +'<circle cx="82" cy="52" r="3" fill="'+a+'" fill-opacity="0.6"/>'
+      +'<line x1="82" y1="43" x2="82" y2="28" stroke="'+a+'" stroke-width="1.5" stroke-opacity="0.5"/>'
+      +'<line x1="82" y1="61" x2="82" y2="76" stroke="'+a+'" stroke-width="1.5" stroke-opacity="0.5"/>'
+      +'<line x1="73" y1="52" x2="58" y2="52" stroke="'+a+'" stroke-width="1.5" stroke-opacity="0.5"/>'
+      +'<line x1="91" y1="52" x2="106" y2="52" stroke="'+a+'" stroke-width="1.5" stroke-opacity="0.5"/>'
+      +'</g>'
+      +'<g><animateTransform attributeName="transform" type="rotate" from="0 144 26" to="-360 144 26" dur="9.4s" repeatCount="indefinite"/>'
+      +'<circle cx="144" cy="26" r="20" stroke="'+a+'" stroke-width="6" stroke-dasharray="8 6" stroke-opacity="0.28" fill="none"/>'
+      +'<circle cx="144" cy="26" r="13" stroke="'+a+'" stroke-width="1.5" stroke-opacity="0.45" fill="none"/>'
+      +'<circle cx="144" cy="26" r="5" stroke="'+a+'" stroke-width="1" stroke-opacity="0.6" fill="none"/>'
+      +'<circle cx="144" cy="26" r="2" fill="'+a+'" fill-opacity="0.5"/>'
+      +'<line x1="144" y1="21" x2="144" y2="13" stroke="'+a+'" stroke-width="1" stroke-opacity="0.45"/>'
+      +'<line x1="144" y1="31" x2="144" y2="39" stroke="'+a+'" stroke-width="1" stroke-opacity="0.45"/>'
+      +'<line x1="139" y1="26" x2="131" y2="26" stroke="'+a+'" stroke-width="1" stroke-opacity="0.45"/>'
+      +'<line x1="149" y1="26" x2="157" y2="26" stroke="'+a+'" stroke-width="1" stroke-opacity="0.45"/>'
+      +'</g>'
+      +'<circle cx="82" cy="52" r="38" stroke="'+a+'" stroke-width="0.5" fill="none" stroke-opacity="0"><animate attributeName="r" values="34;50;34" dur="5s" repeatCount="indefinite"/><animate attributeName="stroke-opacity" values="0.25;0;0.25" dur="5s" repeatCount="indefinite"/></circle>'
+      +'</svg></div>';
+  } else {
+    return '<div style="margin:1.5rem auto .5rem;display:flex;justify-content:center;">'
+      +'<svg width="210" height="90" viewBox="0 0 210 90" fill="none">'
+      +'<path d="M14,76 Q48,76 68,44 Q88,12 105,12 Q122,12 142,44 Q162,76 196,76" stroke="'+a+'" stroke-width="1.5" stroke-opacity="0.18" fill="none" stroke-dasharray="5,4"/>'
+      +'<path d="M14,76 Q48,76 68,44 Q88,12 105,12 Q122,12 142,44 Q162,76 196,76" stroke="'+a+'" stroke-width="2" stroke-opacity="0.7" fill="none" stroke-linecap="round" stroke-dasharray="360" stroke-dashoffset="360"><animate attributeName="stroke-dashoffset" values="360;0" dur="1.5s" begin="0.2s" fill="freeze"/></path>'
+      +'<circle cx="14" cy="76" r="5" fill="'+a+'" fill-opacity="0.9"/>'
+      +'<circle cx="14" cy="76" r="5" stroke="'+a+'" stroke-width="1" fill="none" stroke-opacity="0"><animate attributeName="r" values="5;18;5" dur="2.8s" repeatCount="indefinite"/><animate attributeName="stroke-opacity" values="0.55;0;0.55" dur="2.8s" repeatCount="indefinite"/></circle>'
+      +'<circle cx="105" cy="12" r="4" fill="'+a+'" fill-opacity="0.6"/>'
+      +'<circle cx="105" cy="12" r="4" stroke="'+a+'" stroke-width="1" fill="none" stroke-opacity="0"><animate attributeName="r" values="4;14;4" dur="3.2s" begin="0.5s" repeatCount="indefinite"/><animate attributeName="stroke-opacity" values="0.45;0;0.45" dur="3.2s" begin="0.5s" repeatCount="indefinite"/></circle>'
+      +'<circle cx="196" cy="76" r="5" fill="'+a+'" fill-opacity="0"><animate attributeName="fill-opacity" values="0;0.9" dur="0.3s" begin="1.6s" fill="freeze"/></circle>'
+      +'<circle cx="196" cy="76" r="5" stroke="'+a+'" stroke-width="1" fill="none" stroke-opacity="0"><animate attributeName="r" values="5;18;5" dur="2.8s" begin="1.9s" repeatCount="indefinite"/><animate attributeName="stroke-opacity" values="0;0.55;0" dur="2.8s" begin="1.9s" repeatCount="indefinite"/></circle>'
+      +'<circle r="5.5" fill="'+a+'"><animate attributeName="cx" values="14;41;68;105;142;169;196" dur="2.6s" begin="2.2s" repeatCount="indefinite" calcMode="spline" keyTimes="0;0.16;0.32;0.5;0.68;0.84;1" keySplines="0.4 0 0.6 1;0.4 0 0.6 1;0.4 0 0.6 1;0.4 0 0.6 1;0.4 0 0.6 1;0.4 0 0.6 1"/><animate attributeName="cy" values="76;60;44;12;44;60;76" dur="2.6s" begin="2.2s" repeatCount="indefinite" calcMode="spline" keyTimes="0;0.16;0.32;0.5;0.68;0.84;1" keySplines="0.4 0 0.6 1;0.4 0 0.6 1;0.4 0 0.6 1;0.4 0 0.6 1;0.4 0 0.6 1;0.4 0 0.6 1"/></circle>'
+      +'<text x="4" y="88" fill="'+a+'" fill-opacity="0.4" font-size="7" font-family="Inter,sans-serif">Start</text>'
+      +'<text x="93" y="8" fill="'+a+'" fill-opacity="0.4" font-size="7" font-family="Inter,sans-serif">Transit</text>'
+      +'<text x="180" y="88" fill="'+a+'" fill-opacity="0.4" font-size="7" font-family="Inter,sans-serif">Ziel</text>'
+      +'</svg></div>';
+  }
+}
+
+function buildHero(h,theme,key){
+  var trust=h.trust.map(function(t,i){return (i>0?'<span class="trust-dot" style="background:'+theme.trustDot+'"></span>':'')+t;}).join('');
+  var title=h.title.split('<em>').join('<em style="color:'+theme.accent+';font-style:italic">');
+  var heroBg=theme.heroBgImg
+    ?'background-color:'+theme.heroBg+';background-image:linear-gradient(to bottom,'+theme.heroOverlay+' 0%,rgba(0,0,0,.55) 50%,'+theme.heroOverlay+' 100%),url('+theme.heroBgImg+');background-size:cover;background-position:center;'
+    :'background:'+theme.heroBg+';';
+  return '<div class="sec-label-bar"><span class="slb-name">Hero</span><span class="slb-new">KI-generiert</span></div>'
+    +'<div class="sec-hero" style="'+heroBg+'">'
+    +'<div class="sec-hero-label" style="color:'+theme.accent+'">'+h.label+'</div>'
+    +'<div class="sec-hero-title">'+title+'</div>'
+    +'<div class="sec-hero-sub">'+h.sub+'</div>'
+    +heroVisual(key,theme.accent)
+    +'<div class="sec-hero-btns">'
+    +'<button class="sec-btn-prim" style="background:'+theme.btnPrimBg+';color:'+theme.btnPrimColor+'">'+h.btn1+'</button>'
+    +'<button class="sec-btn-ghost" style="border-color:'+theme.btnGhostBorder+';color:'+theme.btnGhostColor+'">'+h.btn2+'</button>'
+    +'</div>'
+    +'<div class="sec-trust" style="color:'+theme.trustColor+'">'+trust+'</div>'
+    +'</div>';
+}
+
+function buildFeats(f,theme){
+  var cards=f.items.map(function(item){
+    return '<div class="feat-card" style="background:'+theme.featCardBg+';border-color:'+theme.featCardBorder+'">'
+      +'<div class="feat-icon" style="background:'+theme.featIconBg+'"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="'+theme.featIconStroke+'" stroke-width="2"><polyline points="20,6 9,17 4,12"/></svg></div>'
+      +'<div class="feat-title" style="color:'+theme.featHeadColor+'">'+item.t+'</div>'
+      +'<div class="feat-desc" style="color:'+theme.featTextColor+'">'+item.d+'</div>'
+      +'</div>';
+  }).join('');
+  return '<div class="sec-label-bar"><span class="slb-name">Leistungen</span><span class="slb-new">KI-generiert</span></div>'
+    +'<div class="sec-features" style="background:'+theme.featBg+'">'
+    +'<div class="sec-features-title" style="color:'+theme.featHeadColor+'">'+f.title+'</div>'
+    +'<div class="sec-features-sub" style="color:'+theme.featTextColor+'">'+f.sub+'</div>'
+    +'<div class="feat-grid">'+cards+'</div>'
+    +'</div>';
+}
+
+function buildAbout(a,theme){
+  var stats=a.stats.map(function(s){return '<div><div class="stat-val" style="color:'+theme.statValColor+'">'+s.v+'</div><div class="stat-label" style="color:'+theme.aboutTextColor+'">'+s.l+'</div></div>';}).join('');
+  return '<div class="sec-label-bar"><span class="slb-name">Über uns</span><span class="slb-new">KI-generiert</span></div>'
+    +'<div class="sec-about" style="background:'+theme.aboutBg+'">'
+    +'<div class="about-img" style="background:'+theme.aboutImgBg+';overflow:hidden;position:relative;">'
+    +(theme.aboutImg?'<img src="'+theme.aboutImg+'" alt="" loading="lazy" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:.75rem;">':'')
+    +'</div>'
+    +'<div><div class="about-label" style="color:'+theme.aboutLabelColor+'">'+a.label+'</div>'
+    +'<div class="about-title" style="color:'+theme.aboutTitleColor+'">'+a.title+'</div>'
+    +'<div class="about-text" style="color:'+theme.aboutTextColor+'">'+a.text+'</div>'
+    +'<div class="about-stat">'+stats+'</div></div>'
+    +'</div>';
+}
+
+function buildCTA(c,theme){
+  return '<div class="sec-label-bar"><span class="slb-name">Call-to-Action</span><span class="slb-new">KI-generiert</span></div>'
+    +'<div class="sec-cta" style="background:'+theme.ctaBg+'">'
+    +'<div class="sec-cta-title">'+c.title+'</div>'
+    +'<div class="sec-cta-sub">'+c.sub+'</div>'
+    +'<button class="sec-cta-btn" style="background:'+theme.ctaBtnBg+';color:'+theme.ctaBtnColor+'">'+c.btn+'</button>'
+    +'</div>';
+}
+
+function resetGen(){
+  generating=false;
+  document.getElementById('genBtn').disabled=false;
+  document.getElementById('stepsWrap').style.display='none';
+  document.getElementById('resetWrap').style.display='none';
+  document.getElementById('promptInput').value='';
+  document.getElementById('sitePreview').innerHTML='<div class="preview-empty"><div class="pe-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(200,168,98,.4)" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg></div><span style="font-size:.85rem;">Website-Vorschau erscheint hier</span><span style="font-size:.75rem;opacity:.6;">Geben Sie einen Prompt ein oder wählen Sie ein Beispiel</span></div>';
+  ['step1','step2','step3','step4','step5','step6'].forEach(function(s){var el=document.getElementById(s);el.className='gen-step';el.querySelector('.step-dot').innerHTML='';});
+  document.querySelectorAll('.preset').forEach(function(p){p.style.borderColor='';p.style.background='';});
+}
+</script>
+</body>
+</html>

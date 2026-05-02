@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KI-Chatbot – WertFy Demo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+:root{--gold:#C8A862;--bg:#050403;--card:rgba(255,255,255,.03);--text:#f0f0f0;--muted:rgba(240,240,240,.5);}
+body{background:var(--bg);color:var(--text);font-family:'Inter',system-ui,sans-serif;height:100vh;display:flex;flex-direction:column;overflow:hidden;}
+
+/* Header */
+.dh{display:flex;align-items:center;justify-content:space-between;padding:.85rem 2rem;border-bottom:1px solid rgba(200,168,98,.12);background:rgba(5,4,3,.98);backdrop-filter:blur(20px);flex-shrink:0;}
+.dh-logo{display:flex;align-items:center;gap:10px;text-decoration:none;}
+.dh-name{font-family:'Instrument Serif',serif;font-size:1.2rem;color:#f0f0f0;}
+.dh-name span{color:var(--gold);}
+.dh-badge{font-size:.62rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);background:rgba(200,168,98,.08);border:1px solid rgba(200,168,98,.2);border-radius:999px;padding:.22rem .75rem;}
+.dh-cta{background:var(--gold);color:#000;border:none;border-radius:999px;padding:.52rem 1.35rem;font-family:'Inter',sans-serif;font-weight:600;font-size:.8rem;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:.4rem;transition:background .2s;}
+.dh-cta:hover{background:#d4b870;}
+
+/* Status bar */
+.status-bar{background:rgba(200,168,98,.04);border-bottom:1px solid rgba(200,168,98,.07);padding:.55rem 2rem;display:flex;align-items:center;gap:1rem;flex-shrink:0;}
+.live-dot{width:7px;height:7px;border-radius:50%;background:#4ade80;box-shadow:0 0 8px rgba(74,222,128,.5);animation:lp 2.2s ease infinite;}
+@keyframes lp{0%,100%{opacity:1;box-shadow:0 0 8px rgba(74,222,128,.5);}50%{opacity:.5;box-shadow:0 0 4px rgba(74,222,128,.2);}}
+.status-text{font-size:.76rem;color:rgba(240,240,240,.45);}
+.status-text strong{color:rgba(240,240,240,.75);font-weight:500;}
+.status-right{margin-left:auto;font-size:.7rem;color:rgba(200,168,98,.4);letter-spacing:.05em;}
+
+/* Chat layout */
+.chat-wrap{flex:1;display:flex;flex-direction:column;max-width:780px;width:100%;margin:0 auto;padding:0 1.5rem;min-height:0;}
+.chat-msgs{flex:1;overflow-y:auto;padding:1.5rem 0;display:flex;flex-direction:column;gap:1rem;}
+.chat-msgs::-webkit-scrollbar{width:3px;}
+.chat-msgs::-webkit-scrollbar-thumb{background:rgba(200,168,98,.15);border-radius:2px;}
+
+/* Messages */
+.msg-row{display:flex;gap:.7rem;align-items:flex-start;animation:msgIn .25s ease both;}
+@keyframes msgIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:none;}}
+.msg-row.user-row{flex-direction:row-reverse;}
+.avatar{width:30px;height:30px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:.68rem;font-weight:700;}
+.avatar.bot-av{background:rgba(200,168,98,.12);border:1px solid rgba(200,168,98,.3);color:var(--gold);font-family:'Instrument Serif',serif;font-size:.85rem;}
+.avatar.user-av{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);color:rgba(240,240,240,.5);}
+.msg-col{display:flex;flex-direction:column;gap:.3rem;}
+.msg-col.right{align-items:flex-end;}
+.bubble{max-width:480px;padding:.75rem 1.1rem;border-radius:.7rem;font-size:.875rem;line-height:1.65;}
+.bubble.bot{background:rgba(255,255,255,.04);border:1px solid rgba(200,168,98,.1);color:rgba(240,240,240,.9);border-top-left-radius:.15rem;}
+.bubble.user{background:rgba(200,168,98,.1);border:1px solid rgba(200,168,98,.22);color:#f0f0f0;border-top-right-radius:.15rem;}
+.msg-time{font-size:.62rem;color:rgba(240,240,240,.22);}
+.msg-tag{font-size:.6rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;padding:.15rem .55rem;border-radius:999px;display:inline-block;}
+.tag-ok{background:rgba(74,222,128,.08);color:#4ade80;border:1px solid rgba(74,222,128,.2);}
+.tag-info{background:rgba(200,168,98,.08);color:var(--gold);border:1px solid rgba(200,168,98,.2);}
+.tag-esc{background:rgba(248,113,113,.08);color:#f87171;border:1px solid rgba(248,113,113,.2);}
+
+/* Typing dots */
+.typing-dots{display:flex;gap:4px;align-items:center;padding:.45rem .1rem;}
+.td{width:7px;height:7px;border-radius:50%;background:rgba(200,168,98,.45);animation:tb .85s ease infinite;}
+.td:nth-child(2){animation-delay:.2s;}
+.td:nth-child(3){animation-delay:.4s;}
+@keyframes tb{0%,80%,100%{transform:translateY(0);opacity:.45;}40%{transform:translateY(-6px);opacity:1;}}
+
+/* Input area */
+.input-area{padding:.75rem 0 1.2rem;border-top:1px solid rgba(200,168,98,.07);flex-shrink:0;}
+.chips{display:flex;flex-wrap:wrap;gap:.45rem;margin-bottom:.8rem;}
+.chip{background:transparent;border:1px solid rgba(200,168,98,.22);border-radius:999px;padding:.38rem .95rem;font-size:.78rem;color:rgba(200,168,98,.8);cursor:pointer;transition:all .2s;font-family:'Inter',sans-serif;}
+.chip:hover{background:rgba(200,168,98,.07);border-color:var(--gold);color:var(--gold);}
+.input-row{display:flex;gap:.55rem;align-items:center;}
+.msg-input{flex:1;background:rgba(255,255,255,.04);border:1px solid rgba(200,168,98,.14);border-radius:999px;padding:.65rem 1.2rem;color:#f0f0f0;font-family:'Inter',sans-serif;font-size:.875rem;outline:none;transition:border-color .2s;}
+.msg-input::placeholder{color:rgba(240,240,240,.28);}
+.msg-input:focus{border-color:rgba(200,168,98,.38);}
+.send-btn{width:38px;height:38px;border-radius:50%;background:var(--gold);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:background .2s,transform .15s;}
+.send-btn:hover{background:#d4b870;transform:scale(1.06);}
+.send-btn svg{width:15px;height:15px;stroke:#000;stroke-width:2.5;fill:none;}
+
+/* WhatsApp card */
+.wa-card{background:rgba(37,211,102,.06);border:1px solid rgba(37,211,102,.2);border-radius:.75rem;padding:1.1rem 1.25rem;margin-top:.25rem;max-width:420px;animation:msgIn .3s ease both;}
+.wa-card-head{display:flex;align-items:center;gap:.6rem;margin-bottom:.6rem;}
+.wa-icon{width:28px;height:28px;border-radius:50%;background:rgba(37,211,102,.15);border:1px solid rgba(37,211,102,.3);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.wa-card-title{font-size:.82rem;font-weight:600;color:#f0f0f0;}
+.wa-card-sub{font-size:.72rem;color:rgba(240,240,240,.45);margin-bottom:.85rem;line-height:1.55;}
+.wa-problem{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:.45rem;padding:.6rem .85rem;font-size:.78rem;color:rgba(240,240,240,.6);margin-bottom:.85rem;line-height:1.5;font-style:italic;}
+.wa-btn{display:flex;align-items:center;justify-content:center;gap:.55rem;background:#25d366;color:#fff;border:none;border-radius:999px;padding:.65rem 1.5rem;font-family:'Inter',sans-serif;font-weight:700;font-size:.82rem;cursor:pointer;width:100%;transition:background .2s,transform .15s;text-decoration:none;}
+.wa-btn:hover{background:#1ebe5d;transform:translateY(-1px);}
+.wa-response-time{text-align:center;margin-top:.55rem;font-size:.65rem;color:rgba(37,211,102,.55);}
+
+/* WhatsApp chip – persistent */
+.chip-wa{background:rgba(37,211,102,.07);border:1px solid rgba(37,211,102,.2);border-radius:999px;padding:.38rem .95rem;font-size:.78rem;color:rgba(37,211,102,.85);cursor:pointer;transition:all .2s;font-family:'Inter',sans-serif;}
+.chip-wa:hover{background:rgba(37,211,102,.13);border-color:#25d366;color:#25d366;}
+
+/* Persistent WhatsApp bar */
+.wa-bar{display:flex;align-items:center;justify-content:center;gap:.6rem;padding:.55rem 0 0;border-top:1px solid rgba(37,211,102,.08);margin-top:.5rem;}
+.wa-bar-btn{display:inline-flex;align-items:center;gap:.45rem;background:transparent;border:1px solid rgba(37,211,102,.2);border-radius:999px;padding:.38rem 1.1rem;font-size:.75rem;color:rgba(37,211,102,.7);cursor:pointer;font-family:'Inter',sans-serif;transition:all .2s;}
+.wa-bar-btn:hover{background:rgba(37,211,102,.07);border-color:#25d366;color:#25d366;}
+</style>
+</head>
+<body>
+
+<header class="dh">
+  <div class="dh-logo">
+    <svg width="28" height="28" viewBox="-155 -155 310 310"><circle cx="0" cy="0" r="140" stroke="#C8A862" stroke-width="3" fill="none" opacity="0.4"/><circle cx="0" cy="0" r="100" stroke="#C8A862" stroke-width="4" fill="none" opacity="0.75"/><circle cx="0" cy="0" r="54" stroke="#C8A862" stroke-width="5" fill="none"/><circle cx="0" cy="0" r="14" fill="#C8A862"/><circle cx="140" cy="0" r="10" fill="#C8A862"/></svg>
+    <span class="dh-name">WertFy<span>.</span></span>
+    <span class="dh-badge">Intelligenter Chatbot</span>
+  </div>
+  <a href="mailto:kontakt@wertfy.com" class="dh-cta">
+    Gespräch buchen
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+  </a>
+</header>
+
+<div class="status-bar">
+  <div class="live-dot"></div>
+  <span class="status-text">Live-Demo &nbsp;·&nbsp; <strong>Müller & Partner GmbH</strong> &nbsp;·&nbsp; Kundenservice-Assistent &nbsp;·&nbsp; 24/7 aktiv</span>
+  <span class="status-right">Powered by WertFy AI</span>
+</div>
+
+<div class="chat-wrap">
+  <div class="chat-msgs" id="msgs"></div>
+  <div class="input-area">
+    <div class="chips" id="chips"></div>
+    <div class="input-row">
+      <input type="text" class="msg-input" id="inp" placeholder="Schildern Sie Ihr Anliegen oder wählen Sie eine Option …">
+      <button class="send-btn" id="sendBtn">
+        <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </button>
+    </div>
+    <div class="wa-bar">
+      <button class="wa-bar-btn" id="waBarBtn">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="#25d366"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12.003 2.003C6.478 2.003 2 6.481 2 12.005a9.948 9.948 0 0 0 1.334 5.006L2 22l5.147-1.306A9.97 9.97 0 0 0 12.003 22C17.527 22 22 17.522 22 11.997c0-5.523-4.473-10.003-9.997-9.994z"/></svg>
+        Direkt mit Mitarbeiterin verbinden
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+var WA_NUMBER = '4915754785121';
+var userMessages = [];
+
+var flows = {
+  start:{bot:'Guten Tag! Ich bin der KI-Assistent von Müller & Partner GmbH.\n\nWie kann ich Ihnen heute helfen?',tag:null,chips:['Öffnungszeiten','Angebot anfordern','Technischer Support','Produkte & Preise']},
+  'Öffnungszeiten':{bot:'Unsere Geschäftszeiten:\n\nMo – Fr: 08:00 – 17:00 Uhr\nSamstag: 09:00 – 13:00 Uhr\n\nAußerhalb dieser Zeiten beantworte ich Anfragen automatisch. Unser Team meldet sich am nächsten Werktag.',tag:'info',chips:['Termin vereinbaren','Angebot anfordern','Zurück']},
+  'Angebot anfordern':{bot:'Gerne erstellen wir Ihnen ein maßgeschneidertes Angebot.\n\nWelches Produkt oder welche Leistung interessiert Sie?',tag:null,chips:['Standardpaket','Premiumpaket','Individuelle Lösung']},
+  'Standardpaket':{bot:'Das Standardpaket beinhaltet:\n\n· Grundlizenz & Erstinstallation\n· 12 Monate Support-Garantie\n· Quartalsweise Updates\n· Onboarding-Session\n\nStartpreis: 490 € / Jahr\n\nIhre Anfrage wurde an den Vertrieb weitergeleitet. Rückmeldung in unter 2 Stunden.',tag:'ok',chips:['Weitere Frage','Termin vereinbaren','Zurück']},
+  'Premiumpaket':{bot:'Das Premiumpaket – unsere beliebteste Wahl:\n\n· Vollständige Systemintegration\n· 24/7 Priority-Support\n· Dedizierter Account Manager\n· Monatliche Review-Gespräche\n· Erweiterte Analytik\n\nStartpreis: 1.290 € / Jahr\n\nEin individuelles Angebot wurde automatisch vorbereitet. Unser Team meldet sich in 30 Minuten.',tag:'ok',chips:['Weitere Frage','Termin vereinbaren','Zurück']},
+  'Individuelle Lösung':{bot:'Individuelle Lösungen besprechen wir am besten persönlich. Ich verbinde Sie mit einem Lösungsberater.\n\nIhre Anfrage wurde priorisiert weitergeleitet.\nErwartete Rückmeldung: unter 45 Minuten.',tag:'esc',chips:['Termin vereinbaren','Zurück']},
+  'Technischer Support':{bot:'Unser technischer Support ist für Sie da.\n\nWorum handelt es sich?',tag:null,chips:['Software-Problem','Hardware-Problem','Zugangsproblem','Sonstiges']},
+  'Software-Problem':{bot:'Ihre Anfrage wurde an das L2-Support-Team eskaliert.\n\nIch habe in der Zwischenzeit die häufigsten Ursachen geprüft:\n\n→ Letzte Version installiert? (v4.2.1)\n→ Cache geleert?\n→ Systemkompatibilität geprüft?\n\nTicket #S-7821 wurde erstellt. Antwort in unter 2 Stunden.',tag:'ok',chips:['Weitere Frage','Zurück']},
+  'Zugangsproblem':{bot:'Zugangsprobleme werden aus Sicherheitsgründen direkt vom IT-Team bearbeitet.\n\nSicherheitsticket #Z-3342 wurde soeben erstellt und das IT-Team benachrichtigt.\n\nSie erhalten in 15 Minuten eine E-Mail mit Anweisungen.',tag:'esc',chips:['Zurück']},
+  'Produkte & Preise':{bot:'Unsere Produktpalette:\n\n· Standardpaket — ab 490 € / Jahr\n· Premiumpaket — ab 1.290 € / Jahr\n· Enterprise — individuelles Angebot\n\nAlle Pakete beinhalten Onboarding und First-Level-Support. Für ein individuelles Angebot stehe ich gerne zur Verfügung.',tag:'info',chips:['Angebot anfordern','Termin vereinbaren','Zurück']},
+  'Termin vereinbaren':{bot:'Nächste verfügbare Termine:\n\n· Morgen, 10:00 – 10:30 Uhr\n· Morgen, 14:00 – 14:30 Uhr\n· Übermorgen, 09:00 – 09:30 Uhr\n\nWelcher Termin passt Ihnen?',tag:null,chips:['Morgen 10:00 Uhr','Morgen 14:00 Uhr','Übermorgen 09:00 Uhr']},
+  'Morgen 10:00 Uhr':{bot:'Ihr Termin ist bestätigt:\n\n📅 Morgen, 10:00 – 10:30 Uhr\n👤 Thomas Weber, Vertrieb\n📧 Kalendereinladung wird gesendet\n\nIst noch etwas, womit ich helfen kann?',tag:'ok',chips:['Weitere Frage','Zurück']},
+  'Morgen 14:00 Uhr':{bot:'Ihr Termin ist bestätigt:\n\n📅 Morgen, 14:00 – 14:30 Uhr\n👤 Sarah Hoffmann, Beratung\n📧 Kalendereinladung wird gesendet\n\nIst noch etwas, womit ich helfen kann?',tag:'ok',chips:['Weitere Frage','Zurück']},
+  'Übermorgen 09:00 Uhr':{bot:'Ihr Termin ist bestätigt:\n\n📅 Übermorgen, 09:00 – 09:30 Uhr\n👤 Thomas Weber, Vertrieb\n📧 Kalendereinladung wird gesendet\n\nIst noch etwas, womit ich helfen kann?',tag:'ok',chips:['Weitere Frage','Zurück']},
+  'Weitere Frage':{bot:'Natürlich — womit kann ich Ihnen noch helfen?',tag:null,chips:['Öffnungszeiten','Angebot anfordern','Technischer Support','Produkte & Preise']},
+  'Zurück':{bot:'Wie kann ich Ihnen weiterhelfen?',tag:null,chips:['Öffnungszeiten','Angebot anfordern','Technischer Support','Produkte & Preise']},
+  'Sonstiges':{bot:'Ihre Anfrage wurde aufgenommen.\n\nTicket #A-' + (8000 + Math.floor(Math.random()*999)) + ' wurde erstellt. Unser Team meldet sich innerhalb von 2 Stunden bei Ihnen.',tag:'esc',chips:['Weitere Frage','Zurück']},
+  'Hardware-Problem':{bot:'Hardware-Anfragen werden von unserem Field-Service-Team bearbeitet.\n\nTicket #H-' + (5000 + Math.floor(Math.random()*999)) + ' erstellt.\n\nEin Techniker meldet sich innerhalb von 4 Stunden. Bei kritischem Ausfall: Hotline 0800 123 456.',tag:'esc',chips:['Weitere Frage','Zurück']}
+};
+
+var msgs = document.getElementById('msgs');
+var inp = document.getElementById('inp');
+var chipsEl = document.getElementById('chips');
+var busy = false;
+
+function ts(){return new Date().toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'});}
+
+function scrollBottom(){msgs.scrollTop = msgs.scrollHeight;}
+
+function addUser(text){
+  var r = document.createElement('div');
+  r.className = 'msg-row user-row';
+  r.innerHTML = '<div class="avatar user-av">Sie</div><div class="msg-col right"><div class="bubble user">'+escHtml(text)+'</div><div class="msg-time">'+ts()+'</div></div>';
+  msgs.appendChild(r); scrollBottom();
+}
+
+function showTyping(){
+  var r = document.createElement('div');
+  r.className = 'msg-row'; r.id = 'typing';
+  r.innerHTML = '<div class="avatar bot-av">W</div><div class="bubble bot"><div class="typing-dots"><div class="td"></div><div class="td"></div><div class="td"></div></div></div>';
+  msgs.appendChild(r); scrollBottom();
+}
+
+function hideTyping(){var t=document.getElementById('typing');if(t)t.remove();}
+
+function addBot(text, tag){
+  var tagMap = {ok:'<span class="msg-tag tag-ok">Gelöst</span>',info:'<span class="msg-tag tag-info">Verarbeitet</span>',esc:'<span class="msg-tag tag-esc">Weitergeleitet</span>'};
+  var r = document.createElement('div');
+  r.className = 'msg-row';
+  var bubble = document.createElement('div');
+  bubble.className = 'bubble bot';
+  var col = document.createElement('div');
+  col.className = 'msg-col';
+  col.appendChild(bubble);
+  if(tag && tagMap[tag]) col.insertAdjacentHTML('beforeend', tagMap[tag]);
+  var timeEl = document.createElement('div');
+  timeEl.className = 'msg-time'; timeEl.textContent = ts();
+  col.appendChild(timeEl);
+  r.innerHTML = '<div class="avatar bot-av">W</div>';
+  r.appendChild(col);
+  msgs.appendChild(r); scrollBottom();
+  streamText(bubble, text);
+}
+
+function streamText(el, text){
+  var words = text.split(' ');
+  var i = 0;
+  function next(){
+    if(i < words.length){
+      el.innerHTML = words.slice(0,i+1).join(' ').replace(/\n/g,'<br>');
+      i++; scrollBottom();
+      setTimeout(next, 38 + Math.random()*22);
+    }
+  }
+  next();
+}
+
+function escHtml(t){return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+/* ── WhatsApp data-collection wizard ── */
+var collectState = null; // null | 'name' | 'company' | 'size' | 'problem'
+var collected = {};
+
+var WA_SVG = '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12.003 2.003C6.478 2.003 2 6.481 2 12.005a9.948 9.948 0 0 0 1.334 5.006L2 22l5.147-1.306A9.97 9.97 0 0 0 12.003 22C17.527 22 22 17.522 22 11.997c0-5.523-4.473-10.003-9.997-9.994z"/></svg>';
+
+function buildWALink(d){
+  var msg = 'Hallo Maiana 👋\n\n'
+    + 'Ich wurde über den WertFy-Chatbot weitergeleitet und möchte mehr erfahren.\n\n'
+    + '━━━━━━━━━━━━━━━━━━\n'
+    + '👤 Name: ' + (d.name || '–') + '\n'
+    + '🏢 Unternehmen: ' + (d.company || '–') + '\n'
+    + '👥 Teamgröße: ' + (d.size || '–') + '\n'
+    + '📋 Anliegen: ' + (d.problem || '–') + '\n'
+    + '━━━━━━━━━━━━━━━━━━\n\n'
+    + 'Bitte melden Sie sich bei mir. Vielen Dank!';
+  return 'https://wa.me/' + WA_NUMBER + '?text=' + encodeURIComponent(msg);
+}
+
+function addWACard(d){
+  var link = buildWALink(d);
+  var row = document.createElement('div');
+  row.className = 'msg-row';
+  var card = document.createElement('div');
+  card.className = 'wa-card';
+  card.innerHTML = '<div class="wa-card-head">'
+    + '<div class="wa-icon" style="color:#25d366;">' + WA_SVG + '</div>'
+    + '<span class="wa-card-title">Weiterleitung zu Maiana</span>'
+    + '</div>'
+    + '<div class="wa-card-sub">Alle Ihre Angaben werden strukturiert übermittelt – Maiana ist sofort im Bild.</div>'
+    + '<div class="wa-problem">'
+    + '<span style="color:rgba(240,240,240,.4);font-size:.68rem;display:block;margin-bottom:.3rem;">Ihre Zusammenfassung</span>'
+    + '<b>' + escHtml(d.name||'') + '</b> · ' + escHtml(d.company||'') + ' · ' + escHtml(d.size||'') + '<br>'
+    + '<span style="font-style:normal;color:rgba(240,240,240,.55);">' + escHtml(d.problem||'') + '</span>'
+    + '</div>'
+    + '<a class="wa-btn" href="' + link + '" target="_blank">'
+    + WA_SVG + ' Jetzt WhatsApp öffnen'
+    + '</a>'
+    + '<div class="wa-response-time">Ø Antwortzeit unter 5 Minuten · Mo – Sa</div>';
+  row.innerHTML = '<div class="avatar bot-av">W</div>';
+  row.appendChild(card);
+  msgs.appendChild(row);
+  scrollBottom();
+}
+
+function askCollect(question, nextState, placeholder){
+  collectState = nextState;
+  inp.placeholder = placeholder || 'Ihre Antwort …';
+  inp.focus();
+  showTyping();
+  setTimeout(function(){
+    hideTyping();
+    addBot(question, null);
+    busy = false;
+  }, 800);
+}
+
+function startCollect(){
+  if(collectState) return;
+  busy = true;
+  chipsEl.innerHTML = '';
+  addUser('Ich möchte direkt mit einer Mitarbeiterin sprechen.');
+  collected = {};
+  setTimeout(function(){
+    showTyping();
+    setTimeout(function(){
+      hideTyping();
+      addBot('Sehr gerne! Damit Maiana Ihre Anfrage optimal vorbereiten kann, benötige ich noch 4 kurze Angaben von Ihnen.\n\nDas dauert weniger als eine Minute.', null);
+      setTimeout(function(){
+        askCollect('Wie ist Ihr vollständiger Name?', 'name', 'Vor- und Nachname …');
+      }, 900);
+    }, 1000);
+  }, 150);
+}
+
+function handleCollect(text){
+  if(!text.trim()) return;
+  inp.value = '';
+  inp.placeholder = 'Ihre Antwort …';
+
+  if(collectState === 'name'){
+    collected.name = text;
+    addUser(text);
+    askCollect('Für welches Unternehmen arbeiten Sie?', 'company', 'Unternehmensname …');
+
+  } else if(collectState === 'company'){
+    collected.company = text;
+    addUser(text);
+    collectState = 'size';
+    busy = true;
+    showTyping();
+    setTimeout(function(){
+      hideTyping();
+      addBot('Wie viele Mitarbeitende hat Ihr Unternehmen?', null);
+      // Show size chips
+      chipsEl.innerHTML = '';
+      ['1–5 Personen','6–19 Personen','20–49 Personen','50+ Personen'].forEach(function(s){
+        var b = document.createElement('button');
+        b.className = 'chip'; b.textContent = s;
+        b.onclick = function(){
+          if(collectState !== 'size') return;
+          collected.size = s;
+          chipsEl.innerHTML = '';
+          addUser(s);
+          askCollect('Beschreiben Sie kurz Ihr Anliegen – was soll WertFy für Sie lösen?', 'problem', 'Mein Anliegen ist …');
+        };
+        chipsEl.appendChild(b);
+      });
+      busy = false;
+    }, 800);
+
+  } else if(collectState === 'problem'){
+    collected.problem = text;
+    addUser(text);
+    collectState = null;
+    inp.placeholder = 'Ihre Nachricht …';
+    busy = true;
+    chipsEl.innerHTML = '';
+    showTyping();
+    setTimeout(function(){
+      hideTyping();
+      addBot('Vielen Dank! Ich habe alle Angaben erfasst.\n\nIch öffne jetzt WhatsApp – Ihre Daten werden strukturiert an Maiana übermittelt. Sie müssen nur noch auf Senden drücken.', 'ok');
+      setTimeout(function(){
+        addWACard(collected);
+        setChips(['Weitere Frage','Zurück']);
+        busy = false;
+      }, 900);
+    }, 800);
+  }
+}
+
+function setChips(list){
+  chipsEl.innerHTML = '';
+  list.forEach(function(c){
+    var b = document.createElement('button');
+    b.className = 'chip'; b.textContent = c;
+    b.onclick = function(){if(!busy && !collectState) handle(c);};
+    chipsEl.appendChild(b);
+  });
+  var wa = document.createElement('button');
+  wa.className = 'chip-wa'; wa.textContent = 'Mitarbeiterin verbinden';
+  wa.onclick = function(){if(!busy && !collectState) startCollect();};
+  chipsEl.appendChild(wa);
+}
+
+function handle(text){
+  if(!text.trim() || busy || collectState) return;
+  busy = true;
+  inp.value = '';
+  chipsEl.innerHTML = '';
+  addUser(text);
+  var isKnown = !!flows[text];
+  if(!isKnown) userMessages.push(text);
+  setTimeout(function(){
+    showTyping();
+    var delay = 900 + Math.random()*700;
+    setTimeout(function(){
+      hideTyping();
+      var f = flows[text];
+      if(!f){
+        addBot('Ich habe Ihr Anliegen notiert.\n\nFür eine persönliche Beratung verbinde ich Sie direkt mit Maiana – ich sammle dafür kurz Ihre Kontaktdaten.', null);
+        setTimeout(function(){
+          collected = { problem: text };
+          askCollect('Wie ist Ihr vollständiger Name?', 'name', 'Vor- und Nachname …');
+        }, 900);
+        return;
+      }
+      addBot(f.bot, f.tag);
+      setTimeout(function(){setChips(f.chips); busy = false;}, 700);
+    }, delay);
+  }, 150);
+}
+
+function submit(){
+  if(collectState) { handleCollect(inp.value); }
+  else { handle(inp.value); }
+}
+
+// WhatsApp bar button → starts collection wizard
+document.getElementById('waBarBtn').onclick = function(){
+  if(!busy && !collectState) startCollect();
+};
+
+document.getElementById('sendBtn').onclick = submit;
+inp.onkeydown = function(e){if(e.key==='Enter') submit();};
+
+// Initial greeting
+setTimeout(function(){
+  showTyping();
+  setTimeout(function(){
+    hideTyping();
+    addBot(flows.start.bot, flows.start.tag);
+    setTimeout(function(){setChips(flows.start.chips);}, 900);
+  }, 1100);
+}, 600);
+</script>
+</body>
+</html>

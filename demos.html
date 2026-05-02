@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WertFy – Demo-Center</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+:root{--gold:#C8A862;--bg:#050403;}
+body{background:var(--bg);color:#f0f0f0;font-family:'Inter',system-ui,sans-serif;min-height:100vh;}
+
+/* Header */
+.dh{display:flex;align-items:center;justify-content:space-between;padding:1rem 3vw;border-bottom:1px solid rgba(200,168,98,.12);background:rgba(5,4,3,.98);position:sticky;top:0;z-index:50;}
+.dh-logo{display:flex;align-items:center;gap:10px;text-decoration:none;}
+.dh-name{font-family:'Instrument Serif',serif;font-size:1.25rem;color:#f0f0f0;}
+.dh-name span{color:var(--gold);}
+.dh-cta{background:var(--gold);color:#000;border:none;border-radius:999px;padding:.52rem 1.35rem;font-family:'Inter',sans-serif;font-weight:600;font-size:.8rem;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:.4rem;transition:background .2s;}
+.dh-cta:hover{background:#d4b870;}
+
+/* Hero */
+.hero{text-align:center;padding:5rem 5vw 4rem;border-bottom:1px solid rgba(200,168,98,.07);}
+.hero-label{font-size:.7rem;font-weight:500;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);margin-bottom:1.25rem;display:flex;align-items:center;justify-content:center;gap:.6rem;}
+.hero-label::before,.hero-label::after{content:'';width:28px;height:1px;background:var(--gold);opacity:.5;}
+.hero-title{font-family:'Instrument Serif',serif;font-size:clamp(2rem,5vw,3.5rem);color:#f0f0f0;line-height:1.1;margin-bottom:.85rem;}
+.hero-title em{color:var(--gold);font-style:italic;}
+.hero-sub{font-size:.95rem;color:rgba(240,240,240,.45);max-width:520px;margin:0 auto 2.5rem;line-height:1.75;}
+.hero-tags{display:flex;justify-content:center;flex-wrap:wrap;gap:.5rem;}
+.h-tag{background:rgba(200,168,98,.06);border:1px solid rgba(200,168,98,.14);border-radius:999px;padding:.3rem .9rem;font-size:.72rem;color:rgba(200,168,98,.7);}
+
+/* Grid */
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem;max-width:1100px;margin:3.5rem auto 5rem;padding:0 3vw;}
+@media(max-width:900px){.grid{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:560px){.grid{grid-template-columns:1fr;}}
+
+/* Demo card */
+.demo-card{background:rgba(255,255,255,.025);border:1px solid rgba(200,168,98,.1);border-radius:.85rem;overflow:hidden;transition:border-color .3s,transform .3s,box-shadow .3s;text-decoration:none;display:flex;flex-direction:column;}
+.demo-card:hover{border-color:rgba(200,168,98,.35);transform:translateY(-4px);box-shadow:0 16px 48px rgba(0,0,0,.4);}
+.card-preview{height:160px;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;border-bottom:1px solid rgba(200,168,98,.07);}
+.card-icon{width:56px;height:56px;border-radius:50%;background:rgba(200,168,98,.08);border:1px solid rgba(200,168,98,.18);display:flex;align-items:center;justify-content:center;position:relative;z-index:2;}
+.card-body{padding:1.25rem 1.4rem;flex:1;display:flex;flex-direction:column;}
+.card-number{font-size:.62rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:rgba(200,168,98,.4);margin-bottom:.5rem;}
+.card-title{font-family:'Instrument Serif',serif;font-size:1.15rem;color:#f0f0f0;margin-bottom:.4rem;line-height:1.25;}
+.card-desc{font-size:.8rem;color:rgba(240,240,240,.45);line-height:1.6;flex:1;}
+.card-footer{display:flex;align-items:center;justify-content:space-between;margin-top:1rem;padding-top:.85rem;border-top:1px solid rgba(200,168,98,.07);}
+.card-link{font-size:.78rem;font-weight:600;color:var(--gold);display:flex;align-items:center;gap:.35rem;}
+.card-tag{font-size:.62rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;background:rgba(200,168,98,.06);border:1px solid rgba(200,168,98,.12);border-radius:999px;padding:.18rem .55rem;color:rgba(200,168,98,.5);}
+
+/* Decorative bg per card */
+.bg-1{background:radial-gradient(ellipse at 50% 120%,rgba(200,168,98,.07),transparent 70%);}
+.bg-2{background:radial-gradient(ellipse at 50% 120%,rgba(96,165,250,.06),transparent 70%);}
+.bg-3{background:radial-gradient(ellipse at 50% 120%,rgba(74,222,128,.06),transparent 70%);}
+.bg-4{background:radial-gradient(ellipse at 50% 120%,rgba(251,146,60,.06),transparent 70%);}
+.bg-5{background:radial-gradient(ellipse at 50% 120%,rgba(167,139,250,.06),transparent 70%);}
+.bg-6{background:radial-gradient(ellipse at 50% 120%,rgba(248,113,113,.06),transparent 70%);}
+
+/* Ambient dots */
+.dot-ring{position:absolute;border-radius:50%;border:1px solid rgba(200,168,98,.12);}
+
+/* Bottom bar */
+.bottom{text-align:center;padding:2.5rem 3vw 4rem;border-top:1px solid rgba(200,168,98,.06);}
+.bottom-title{font-family:'Instrument Serif',serif;font-size:1.4rem;color:#f0f0f0;margin-bottom:.5rem;}
+.bottom-sub{font-size:.85rem;color:rgba(240,240,240,.35);margin-bottom:1.5rem;}
+</style>
+</head>
+<body>
+
+<header class="dh">
+  <a href="index.html" class="dh-logo">
+    <svg width="28" height="28" viewBox="-155 -155 310 310"><circle cx="0" cy="0" r="140" stroke="#C8A862" stroke-width="3" fill="none" opacity="0.4"/><circle cx="0" cy="0" r="100" stroke="#C8A862" stroke-width="4" fill="none" opacity="0.75"/><circle cx="0" cy="0" r="54" stroke="#C8A862" stroke-width="5" fill="none"/><circle cx="0" cy="0" r="14" fill="#C8A862"/><circle cx="140" cy="0" r="10" fill="#C8A862"/></svg>
+    <span class="dh-name">WertFy<span>.</span></span>
+  </a>
+  <a href="mailto:kontakt@wertfy.com" class="dh-cta">Gespräch buchen <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
+</header>
+
+<div class="hero">
+  <div class="hero-label">Live-Demos</div>
+  <h1 class="hero-title">KI, die Sie <em>erleben</em> können.</h1>
+  <p class="hero-sub">Jede Demo zeigt ein echtes WertFy-Produkt in Aktion – interaktiv, sofort verständlich und auf Ihr Unternehmen übertragbar.</p>
+  <div class="hero-tags">
+    <span class="h-tag">Keine Installation</span>
+    <span class="h-tag">Sofort nutzbar</span>
+    <span class="h-tag">Offline-fähig</span>
+    <span class="h-tag">Echtzeit-Interaktion</span>
+  </div>
+</div>
+
+<div class="grid">
+
+  <a href="demo-chatbot.html" class="demo-card">
+    <div class="card-preview bg-1">
+      <div class="dot-ring" style="width:120px;height:120px;"></div>
+      <div class="dot-ring" style="width:80px;height:80px;"></div>
+      <div class="card-icon">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#C8A862" stroke-width="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="card-number">01</div>
+      <div class="card-title">Intelligenter Chatbot</div>
+      <div class="card-desc">24/7-Kundenservice-Assistent mit natürlicher Konversation, Ticket-Erstellung und automatischer Weiterleitung.</div>
+      <div class="card-footer">
+        <span class="card-link">Demo starten <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
+        <span class="card-tag">Interaktiv</span>
+      </div>
+    </div>
+  </a>
+
+  <a href="demo-dokumente.html" class="demo-card">
+    <div class="card-preview bg-2">
+      <div class="dot-ring" style="width:120px;height:120px;border-color:rgba(96,165,250,.12);"></div>
+      <div class="dot-ring" style="width:80px;height:80px;border-color:rgba(96,165,250,.12);"></div>
+      <div class="card-icon" style="background:rgba(96,165,250,.06);border-color:rgba(96,165,250,.18);">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="card-number">02</div>
+      <div class="card-title">Dokumentenverarbeitung</div>
+      <div class="card-desc">KI scannt eine Rechnung und extrahiert alle Felder automatisch – mit Konfidenz-Score und ERP-Übergabe.</div>
+      <div class="card-footer">
+        <span class="card-link" style="color:#60a5fa;">Demo starten <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
+        <span class="card-tag" style="color:rgba(96,165,250,.5);background:rgba(96,165,250,.05);border-color:rgba(96,165,250,.12);">Live-Scan</span>
+      </div>
+    </div>
+  </a>
+
+  <a href="demo-reporting.html" class="demo-card">
+    <div class="card-preview bg-3">
+      <div class="dot-ring" style="width:120px;height:120px;border-color:rgba(74,222,128,.1);"></div>
+      <div class="dot-ring" style="width:80px;height:80px;border-color:rgba(74,222,128,.1);"></div>
+      <div class="card-icon" style="background:rgba(74,222,128,.06);border-color:rgba(74,222,128,.15);">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#4ade80" stroke-width="1.5"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="card-number">03</div>
+      <div class="card-title">Datenanalyse & Reporting</div>
+      <div class="card-desc">Echtzeit-Dashboard mit animierten KPIs, Umsatzentwicklung und Live-Datensimulation – für Geschäftsführung und Management.</div>
+      <div class="card-footer">
+        <span class="card-link" style="color:#4ade80;">Demo starten <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
+        <span class="card-tag" style="color:rgba(74,222,128,.5);background:rgba(74,222,128,.05);border-color:rgba(74,222,128,.12);">Live-Daten</span>
+      </div>
+    </div>
+  </a>
+
+  <a href="demo-email.html" class="demo-card">
+    <div class="card-preview bg-4">
+      <div class="dot-ring" style="width:120px;height:120px;border-color:rgba(251,146,60,.1);"></div>
+      <div class="dot-ring" style="width:80px;height:80px;border-color:rgba(251,146,60,.1);"></div>
+      <div class="card-icon" style="background:rgba(251,146,60,.06);border-color:rgba(251,146,60,.15);">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fb923c" stroke-width="1.5"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="card-number">04</div>
+      <div class="card-title">E-Mail-Automatisierung</div>
+      <div class="card-desc">Posteingang mit KI-Klassifizierung, Stimmungsanalyse und automatisch generiertem Antwortvorschlag in Sekunden.</div>
+      <div class="card-footer">
+        <span class="card-link" style="color:#fb923c;">Demo starten <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
+        <span class="card-tag" style="color:rgba(251,146,60,.5);background:rgba(251,146,60,.05);border-color:rgba(251,146,60,.12);">6 E-Mails</span>
+      </div>
+    </div>
+  </a>
+
+  <a href="demo-projekte.html" class="demo-card">
+    <div class="card-preview bg-5">
+      <div class="dot-ring" style="width:120px;height:120px;border-color:rgba(167,139,250,.1);"></div>
+      <div class="dot-ring" style="width:80px;height:80px;border-color:rgba(167,139,250,.1);"></div>
+      <div class="card-icon" style="background:rgba(167,139,250,.06);border-color:rgba(167,139,250,.15);">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#a78bfa" stroke-width="1.5"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="card-number">05</div>
+      <div class="card-title">Projektmanagement</div>
+      <div class="card-desc">KI-Kanban-Board mit automatischer Priorisierung, Ressourcenanalyse und Effizienz-Score in Echtzeit.</div>
+      <div class="card-footer">
+        <span class="card-link" style="color:#a78bfa;">Demo starten <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
+        <span class="card-tag" style="color:rgba(167,139,250,.5);background:rgba(167,139,250,.05);border-color:rgba(167,139,250,.12);">KI-Analyse</span>
+      </div>
+    </div>
+  </a>
+
+  <a href="demo-website.html" class="demo-card">
+    <div class="card-preview bg-6">
+      <div class="dot-ring" style="width:120px;height:120px;border-color:rgba(248,113,113,.1);"></div>
+      <div class="dot-ring" style="width:80px;height:80px;border-color:rgba(248,113,113,.1);"></div>
+      <div class="card-icon" style="background:rgba(248,113,113,.06);border-color:rgba(248,113,113,.15);">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#f87171" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="card-number">06</div>
+      <div class="card-title">Website-Erstellung</div>
+      <div class="card-desc">Prompt eingeben, Website sehen – KI generiert eine vollständige professionelle Website in wenigen Sekunden.</div>
+      <div class="card-footer">
+        <span class="card-link" style="color:#f87171;">Demo starten <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
+        <span class="card-tag" style="color:rgba(248,113,113,.5);background:rgba(248,113,113,.05);border-color:rgba(248,113,113,.12);">Generator</span>
+      </div>
+    </div>
+  </a>
+
+</div>
+
+<div class="bottom">
+  <div class="bottom-title">Bereit für Ihr Unternehmen?</div>
+  <div class="bottom-sub">Jede Demo lässt sich direkt auf Ihre Prozesse übertragen. Sprechen Sie mit uns.</div>
+  <a href="mailto:kontakt@wertfy.com" class="dh-cta" style="display:inline-flex;">
+    Gespräch buchen
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+  </a>
+</div>
+
+</body>
+</html>
